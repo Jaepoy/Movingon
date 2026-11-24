@@ -19,20 +19,13 @@
      ===================================================================== -->
 <script>
   const CONFIG = {
-    BRAND_NAME:   "Moving On",                 // Your product / brand name
-    CREATOR_NAME: "Your Name",                 // Your first name or full name
-    PRICE:        "₱199",                      // Display price (any text, e.g. "₱149" or "₱199 one-time")
-    GCASH_NAME:   "Your Full Name",            // Account name shown on GCash/Maya
-    GCASH_NUMBER: "0917 123 4567",             // GCash/Maya number buyers will copy
-    GCASH_LABEL:  "GCash / Maya",              // Label shown next to the number
-    // Where the "I've Paid" button goes. Paste ONE of these:
-    //   - a Google Form link (ask for: name, email, receipt screenshot upload)
-    //   - a payment checkout link
-    //   - a mailto: link, e.g. "mailto:you@example.com?subject=I%20paid%20-%20please%20send%20access"
-    RECEIPT_LINK: "https://forms.gle/REPLACE_WITH_YOUR_FORM_LINK",
+    BRAND_NAME:     "Moving On",               // Your product / brand name
+    CREATOR_NAME:   "your friend",             // How you introduce yourself
+    PRICE:          "₱199",                    // Display price
+    CONTACT_HANDLE: "@jaepoyf",                // The handle people message to get access
+    CONTACT_LINK:   "https://www.tiktok.com/@jaepoyf" // Link opened by the "Message me" button
     // NOTE: The buyer unlock code is set inside tracker.html (ACCESS_CODE).
-    // Keep that code in your private reply to buyers — do NOT print it on this public page.
-    UNLOCK_CODE_HINT: "Your unlock code arrives with your access link."
+    // Share that code privately with buyers — do NOT print it on this public page.
   };
 </script>
 
@@ -118,7 +111,7 @@
   <p class="eyebrow">A 30-to-90-day transition companion</p>
   <h1>You don't have to figure out how to move on alone.</h1>
 
-  <p>Hi, I'm <strong data-cfg="CREATOR_NAME">Your Name</strong>. I made this because the hardest part of a breakup or big life transition isn't the crying — it's the in-between days when you don't know what to do next.</p>
+  <p>Hey you 💛 I'm <strong data-cfg="CREATOR_NAME">your friend</strong>. I made this because the hardest part of a breakup or big life transition isn't the crying — it's the in-between days when you don't know what to do next.</p>
   <p><strong data-cfg="BRAND_NAME">Moving On</strong> gives you small, concrete steps and a calm place to track them. It is not a "forever app." It's built to help you build momentum over about <strong>30 to 90 days</strong>, and then <em>graduate</em> — because the goal is a life that doesn't need the app.</p>
 
   <div class="quote">No pressure, no judgment. Your pace is always yours.</div>
@@ -132,10 +125,10 @@
     <h2>Everything you need, nothing you don't.</h2>
     <div class="card">
       <ul class="clean">
-        <li class="feature"><div class="dot">1</div><div><h3>Guided steps</h3><p class="muted">12 concrete steps across 4 phases, each with a short note on why it matters.</p></div></li>
+        <li class="feature"><div class="dot">1</div><div><h3>Guided steps you can think or say out loud</h3><p class="muted">12 simple steps across 4 phases. No writing needed — each has a question to ask yourself and a note on why it matters.</p></div></li>
         <li class="feature"><div class="dot">2</div><div><h3>Moving-on percentage gauge</h3><p class="muted">A calm progress ring that grows as you complete steps and small wins.</p></div></li>
-        <li class="feature"><div class="dot">3</div><div><h3>Reconnect &amp; reset loop</h3><p class="muted">If you reach out or check in, log it without shame — then take a small reset action to rebuild momentum.</p></div></li>
-        <li class="feature"><div class="dot">4</div><div><h3>Playful focus activities</h3><p class="muted">12+ five-minute resets with a built-in timer for when overthinking hits.</p></div></li>
+        <li class="feature"><div class="dot">3</div><div><h3>One-tap reconnect log</h3><p class="muted">If you tried to reconnect or checked their profile, tap one button. No writing, no shame — then pick a small activity to get your footing back.</p></div></li>
+        <li class="feature"><div class="dot">4</div><div><h3>Daily activities &amp; routine</h3><p class="muted">Choose from easy ideas or add your own, tap Done, and aim for a 100% day. Gentle reminders keep you on track.</p></div></li>
         <li class="feature"><div class="dot">5</div><div><h3>End-of-day honesty check-in</h3><p class="muted">A private note to yourself each night. The app only monitors progress — your decisions are yours.</p></div></li>
         <li class="feature"><div class="dot">6</div><div><h3>Personal to-do list</h3><p class="muted">Add your own small tasks and get a gentle progress boost for each one.</p></div></li>
       </ul>
@@ -150,47 +143,48 @@
   <section id="roadmap">
     <p class="eyebrow">The roadmap</p>
     <h2>Why each step matters</h2>
-    <p class="muted">Every step in the app comes with a reason, so you're never just ticking boxes.</p>
+    <p class="muted">Every step comes with a reason, so you're never just ticking boxes. And you never have to write anything — you can think it or say it out loud.</p>
 
     <div class="card">
       <div class="phase-head"><span class="phase-num">Phase 1</span><h3>Radical Acceptance</h3></div>
-      <div class="step"><strong>Write down the facts of what ended.</strong>
-        <p class="why"><b>Why this step matters:</b> Plain facts stop the mind from bargaining with "what if." You can't move away from something you're still negotiating with.</p></div>
-      <div class="step"><strong>Name three feelings out loud.</strong>
-        <p class="why"><b>Why this step matters:</b> Putting a name on a feeling lowers its intensity and makes it something you can work with, not something that runs you.</p></div>
-      <div class="step"><strong>Say "This chapter is over, and I will be okay."</strong>
-        <p class="why"><b>Why this step matters:</b> Hearing your own voice say it begins turning a painful idea into an accepted fact.</p></div>
+      <div class="step"><strong>Say out loud, just to yourself: "It's over, and I'm learning to accept that."</strong>
+        <p class="why"><b>Why this step matters:</b> Hearing your own voice say it helps your mind start treating it as real. Acceptance begins when you stop arguing with what already happened.</p></div>
+      <div class="step"><strong>Think back and tell yourself what really happened between you two. Just the facts, no "what ifs."</strong>
+        <p class="why"><b>Why this step matters:</b> When you stay with the plain facts, your mind has less room to replay a happier version that never fully existed.</p></div>
+      <div class="step"><strong>Name how you feel right now, out loud. Sad? Angry? Lonely? Relieved?</strong>
+        <p class="why"><b>Why this step matters:</b> Naming a feeling makes it smaller and easier to handle. Feelings with no name tend to run the show.</p></div>
     </div>
 
     <div class="card">
       <div class="phase-head"><span class="phase-num">Phase 2</span><h3>Processing Without Spiraling</h3></div>
-      <div class="step"><strong>Set a daily 15-minute "feelings window."</strong>
-        <p class="why"><b>Why this step matters:</b> Giving grief a time and place keeps it from leaking into every hour of your day.</p></div>
-      <div class="step"><strong>Write an unsent letter — and keep it unsent.</strong>
-        <p class="why"><b>Why this step matters:</b> You get to say everything without consequences, so the words stop circling in your head.</p></div>
-      <div class="step"><strong>Tell one trusted person how you really are.</strong>
-        <p class="why"><b>Why this step matters:</b> Carrying it alone makes it heavier. One honest conversation lightens more than a week of coping in silence.</p></div>
+      <div class="step"><strong>Pick one time each day to let yourself think and feel about them. Outside that time, tell yourself: "Not now, later."</strong>
+        <p class="why"><b>Why this step matters:</b> Giving sadness its own time stops it from taking over your whole day. You are not ignoring it — you are scheduling it.</p></div>
+      <div class="step"><strong>Say what you wish you could tell them, out loud or as a voice note to yourself. Do not send it.</strong>
+        <p class="why"><b>Why this step matters:</b> You get to say everything with no consequences. Once it is out of your head, it stops going in circles.</p></div>
+      <div class="step"><strong>Talk to one person you trust about how you're really doing.</strong>
+        <p class="why"><b>Why this step matters:</b> Carrying it alone makes it heavier. One honest talk can lift more than a week of keeping it inside.</p></div>
     </div>
 
     <div class="card">
       <div class="phase-head"><span class="phase-num">Phase 3</span><h3>Boundaries &amp; Detox</h3></div>
-      <div class="step"><strong>Mute, archive, or hide their messages and updates.</strong>
-        <p class="why"><b>Why this step matters:</b> Every reminder restarts the craving to check. Less exposure means fewer urges to fight.</p></div>
-      <div class="step"><strong>Box up reminders for 30 days.</strong>
-        <p class="why"><b>Why this step matters:</b> Out of sight gives your nervous system room to settle. Nothing is thrown away — you're just creating space.</p></div>
-      <div class="step"><strong>Write your own "if I feel the urge" plan.</strong>
-        <p class="why"><b>Why this step matters:</b> Decisions made while calm beat decisions made at 11 p.m. A plan you wrote yourself is easier to follow.</p></div>
+      <div class="step"><strong>Mute, hide, or unfollow them so you don't see their posts or messages.</strong>
+        <p class="why"><b>Why this step matters:</b> Every reminder sets off the urge to check. Less to see means less to fight each day.</p></div>
+      <div class="step"><strong>Put things that remind you of them out of sight for 30 days.</strong>
+        <p class="why"><b>Why this step matters:</b> Out of sight gives your mind room to calm down. Nothing is thrown away — you're just making space.</p></div>
+      <div class="step"><strong>Make your own rule and say it out loud: "When I feel like reaching out, I will ___ instead."</strong>
+        <p class="why"><b>Why this step matters:</b> A decision made when you're calm is easier to keep than one made late at night.</p></div>
     </div>
 
     <div class="card">
       <div class="phase-head"><span class="phase-num">Phase 4</span><h3>Rebuilding Your Identity</h3></div>
-      <div class="step"><strong>List 5 things that are yours alone.</strong>
-        <p class="why"><b>Why this step matters:</b> Relationships can blur who you are. Reconnecting with your own values and interests rebuilds a steady sense of self.</p></div>
-      <div class="step"><strong>Schedule one thing just for you this week.</strong>
-        <p class="why"><b>Why this step matters:</b> Moving on is built from actions, not intentions. A booked plan turns "someday" into "Saturday."</p></div>
-      <div class="step"><strong>Write a note from you, 90 days from now.</strong>
-        <p class="why"><b>Why this step matters:</b> Picturing an ordinary good day ahead gives your mind something to walk toward, not just away from.</p></div>
+      <div class="step"><strong>Think of 3 things you like about yourself that have nothing to do with them. Say them out loud.</strong>
+        <p class="why"><b>Why this step matters:</b> Relationships can blur who you are. Remembering your own strengths rebuilds a steady sense of self.</p></div>
+      <div class="step"><strong>Pick one thing just for you this week and decide when you'll do it.</strong>
+        <p class="why"><b>Why this step matters:</b> Moving on is built from actions, not just intentions. A plan with a day and time turns "someday" into "Saturday."</p></div>
+      <div class="step"><strong>Picture yourself 3 months from now, doing well. Describe that day out loud to yourself.</strong>
+        <p class="why"><b>Why this step matters:</b> Picturing a good future gives your mind something to walk toward, not just something to run from.</p></div>
     </div>
+
   </section>
 
   <!-- ============ CHECKOUT ============ -->
@@ -199,32 +193,45 @@
     <h2>Simple, one-time access</h2>
     <div class="card" style="text-align:center">
       <div class="price" data-cfg="PRICE">₱199</div>
-      <p class="muted" style="margin-top:6px">One-time payment · No subscription</p>
-
-      <!-- Replace gcash-qr.png in your repo with your own GCash/Maya QR screenshot -->
-      <img class="qr" src="./gcash-qr.png" alt="GCash or Maya QR code for payment" onerror="this.style.opacity='.4'">
-
-      <div class="numbox">
-        <span class="muted"><span data-cfg="GCASH_LABEL">GCash / Maya</span> · <span data-cfg="GCASH_NAME">Your Full Name</span></span>
-        <strong id="gcashNumber" data-cfg="GCASH_NUMBER">0917 123 4567</strong>
-      </div>
-      <button class="btn ghost" id="copyBtn" type="button">Copy GCash/Maya Number</button>
-
-      <!-- "I've Paid" button: its link is set from CONFIG.RECEIPT_LINK at the top of this file.
-           Use a Google Form (name, email, receipt screenshot), a checkout link, or a mailto: link. -->
-      <a class="btn" id="paidBtn" href="#" target="_blank" rel="noopener" style="margin-top:10px">I've Paid — Submit Receipt / Get Access</a>
+      <p class="muted" style="margin-top:6px">One-time payment to get your unlock code · No subscription</p>
+      <p style="margin-top:14px">To get access, just contact me on TikTok at <strong data-cfg="CONTACT_HANDLE">@jaepoyf</strong> and I'll take care of the rest.</p>
+      <!-- Button link is set from CONFIG.CONTACT_LINK at the top of this file -->
+      <a class="btn" id="contactBtn" href="#" target="_blank" rel="noopener" style="margin-top:6px">Message me on TikTok</a>
     </div>
 
     <div class="card">
-      <h3>How you get access</h3>
+      <h3>How it works</h3>
       <ol class="steps">
-        <li>Scan the QR or send the exact amount to the number above.</li>
-        <li>Tap <strong>"I've Paid"</strong> and submit your receipt screenshot with your email.</li>
-        <li>I'll verify and send you your private <strong>tracker link</strong> (tracker.html) and your <strong>unlock code</strong>.</li>
-        <li>Open the link in Safari (iPhone) or Chrome (Android) and add it to your Home Screen.</li>
+        <li>Message me on TikTok at <strong data-cfg="CONTACT_HANDLE">@jaepoyf</strong>.</li>
+        <li>Make the one-time payment of <strong data-cfg="PRICE">₱199</strong>.</li>
+        <li>I'll send you your private tracker link and your <strong>unlock code</strong>.</li>
+        <li>Open the link, enter the code, and add it to your Home Screen (see below).</li>
       </ol>
-      <p class="muted" id="unlockHint">Your unlock code arrives with your access link.</p>
     </div>
+  </section>
+
+  <!-- ============ ADD TO HOME SCREEN ============ -->
+  <section id="homescreen">
+    <p class="eyebrow">Make it an app</p>
+    <h2>Add it to your Home Screen</h2>
+    <p class="muted">Once you have your link, add it to your Home Screen so it opens like a real app, even offline.</p>
+    <div class="card">
+      <h3>iPhone (Safari)</h3>
+      <ol class="steps">
+        <li>Open your link in <strong>Safari</strong>.</li>
+        <li>Tap the <strong>Share</strong> button.</li>
+        <li>Scroll down and tap <strong>Add to Home Screen</strong>, then <strong>Add</strong>.</li>
+      </ol>
+    </div>
+    <div class="card">
+      <h3>Android (Chrome)</h3>
+      <ol class="steps">
+        <li>Open your link in <strong>Chrome</strong>.</li>
+        <li>Tap the <strong>Menu ⋮</strong> at the top right.</li>
+        <li>Tap <strong>Install app</strong> or <strong>Add to Home screen</strong>, then confirm.</li>
+      </ol>
+    </div>
+    <p class="muted">Tip: if the link opens inside another app's built-in browser, tap its menu and choose "Open in Safari" or "Open in Chrome" first.</p>
   </section>
 
   <!-- ============ FAQ ============ -->
@@ -234,7 +241,7 @@
 
     <details>
       <summary>How do I receive it?</summary>
-      <p>After I verify your receipt, I send you a private link to your tracker plus your unlock code, usually by email or message. Open the link, enter the code once, and you're in.</p>
+      <p>Contact me on TikTok at <strong data-cfg="CONTACT_HANDLE">@jaepoyf</strong>. After your one-time payment, I send you a private link to your tracker plus your unlock code. Open the link, enter the code once, and you're in.</p>
     </details>
     <details>
       <summary>How do I add it to my iPhone Home Screen?</summary>
@@ -263,12 +270,10 @@
   </section>
 
   <footer>
-    <p>Made with care by <span data-cfg="CREATOR_NAME">Your Name</span> · <span data-cfg="BRAND_NAME">Moving On</span></p>
+    <p>Made with care by <span data-cfg="CREATOR_NAME">your friend</span> · <span data-cfg="BRAND_NAME">Moving On</span></p>
     <p style="margin-top:6px">Be gentle with yourself. You're doing better than you think.</p>
   </footer>
 </div>
-
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
   // Fill every [data-cfg] element from CONFIG
@@ -277,42 +282,7 @@
     if (CONFIG[key] !== undefined) el.textContent = CONFIG[key];
   });
   document.title = CONFIG.BRAND_NAME + " — A 30-to-90-Day Transition Companion";
-  document.getElementById('paidBtn').href = CONFIG.RECEIPT_LINK;
-  document.getElementById('unlockHint').textContent = CONFIG.UNLOCK_CODE_HINT;
-
-  // Toast helper
-  var toastTimer;
-  function toast(msg) {
-    var t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2200);
-  }
-
-  // Copy number (modern clipboard API with a fallback for older mobile browsers)
-  document.getElementById('copyBtn').addEventListener('click', function () {
-    var text = CONFIG.GCASH_NUMBER.replace(/\s+/g, '');
-    function fallback() {
-      var ta = document.createElement('textarea');
-      ta.value = text;
-      ta.setAttribute('readonly', '');
-      ta.style.position = 'fixed';
-      ta.style.opacity = '0';
-      document.body.appendChild(ta);
-      ta.select();
-      ta.setSelectionRange(0, 99999);
-      var ok = false;
-      try { ok = document.execCommand('copy'); } catch (e) {}
-      document.body.removeChild(ta);
-      toast(ok ? 'Number copied ✓' : 'Could not copy — please copy it manually');
-    }
-    if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(text).then(function () { toast('Number copied ✓'); }, fallback);
-    } else {
-      fallback();
-    }
-  });
+  document.getElementById('contactBtn').href = CONFIG.CONTACT_LINK;
 
   // Service worker (offline support on GitHub Pages)
   if ('serviceWorker' in navigator) {

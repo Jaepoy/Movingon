@@ -1,20 +1,19 @@
 /* Service worker for GitHub Pages (works from a sub-folder like /my-repo/).
    Bump CACHE_VERSION whenever you change any file so users get the update. */
-const CACHE_VERSION = 'moving-on-v1';
+const CACHE_VERSION = 'moving-on-v2';
 const CORE_FILES = [
   './',
   './index.html',
   './tracker.html',
   './manifest.json',
   './icon-192.png',
-  './icon-512.png',
-  './gcash-qr.png'
+  './icon-512.png'
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_VERSION).then((cache) =>
-      // Add files one by one so a missing optional file (e.g. the QR) never blocks install
+      // Add files one by one so a single missing file never blocks install
       Promise.all(CORE_FILES.map((url) => cache.add(url).catch(() => null)))
     ).then(() => self.skipWaiting())
   );

@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Zoom is turned off on purpose so the app stays steady on screen -->
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Moving On — Tracker</title>
 <meta name="theme-color" content="#FAF7F2">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -27,15 +28,18 @@
     // BUYER UNLOCK CODE
     //  - To CHANGE the code: edit ACCESS_CODE below (case-insensitive when entered).
     //  - To DISABLE the gate entirely: set REQUIRE_CODE to false.
-    //  - IMPORTANT: this is a light gate for a static site. Anyone who views the page source can
-    //    read the code, so treat it as a "friendly lock", not bank-level security.
+    //  - This is a light gate for a static site. Anyone who views the page source can read the code.
     //  - Changing the code later will NOT lock out people who already unlocked on their phone.
     REQUIRE_CODE: true,
     ACCESS_CODE: "HEAL2026",
 
     // Length of the transition journey shown in the app (days)
     JOURNEY_MIN_DAYS: 30,
-    JOURNEY_MAX_DAYS: 90
+    JOURNEY_MAX_DAYS: 90,
+
+    // Reminder times (24-hour clock). After EVENING_HOUR the reminder gets firmer.
+    EVENING_HOUR: 17,
+    CHECKIN_HOUR: 20
   };
 </script>
 
@@ -44,33 +48,36 @@
     --cream:#FAF7F2; --card:#FFFFFF; --ink:#2B2623; --line:#EAE3D9;
     --clay:#C47457; --clay-dark:#A85D42; --sage:#7D8F7B; --muted:#6F6761;
     --shadow:0 1px 2px rgba(43,38,35,.05),0 6px 18px rgba(43,38,35,.06);
+    --nav-h:64px;
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-  html{-webkit-text-size-adjust:100%}
+  html{-webkit-text-size-adjust:100%;touch-action:manipulation}
   body{
-    background:var(--cream);color:var(--ink);
+    background:var(--cream);color:var(--ink);touch-action:manipulation;
     font-family:"Plus Jakarta Sans",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
     line-height:1.55;font-size:16px;
-    padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+    padding-top:env(safe-area-inset-top);
   }
-  .wrap{max-width:560px;margin:0 auto;padding:18px 16px 60px}
+  [hidden]{display:none !important}
+  .wrap{max-width:560px;margin:0 auto;padding:18px 16px calc(var(--nav-h) + 34px + env(safe-area-inset-bottom))}
   h1,h2,h3{font-family:Lora,Georgia,serif;line-height:1.25;font-weight:600}
-  h1{font-size:1.5rem}
+  h1{font-size:1.55rem}
   h2{font-size:1.2rem;margin-bottom:6px}
   h3{font-size:1.02rem;margin-bottom:4px}
   p{margin-bottom:10px}
-  .muted{color:var(--muted);font-size:.9rem}
+  .muted{color:var(--muted);font-size:.92rem}
   .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:var(--shadow);margin-bottom:14px}
   .eyebrow{font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--sage);font-weight:700;margin-bottom:4px}
-  .topbar{display:flex;align-items:center;gap:12px;margin-bottom:14px}
-  .topbar img{width:42px;height:42px;border-radius:11px;border:1px solid var(--line)}
+  .pagehead{margin-bottom:14px}
+  .pagehead p{margin:6px 0 0}
   button,input,select,textarea{font:inherit;color:inherit}
   .btn{
-    display:block;width:100%;text-align:center;cursor:pointer;
+    display:block;width:100%;text-align:center;cursor:pointer;text-decoration:none;
     background:var(--clay);color:#fff;border:0;border-radius:14px;padding:14px 16px;
     font-weight:600;min-height:48px
   }
   .btn:active{background:var(--clay-dark)}
+  .btn:disabled{opacity:.55;cursor:default}
   .btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
   .btn.sage{background:var(--sage)}
   .btn.small{display:inline-block;width:auto;padding:10px 14px;min-height:42px;border-radius:12px;font-size:.92rem}
@@ -91,6 +98,21 @@
   .err{color:#A33A2A;font-size:.9rem;min-height:1.3em;margin-top:8px}
   #app{display:none}
 
+  /* Bottom navigation */
+  nav.tabs{
+    position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(255,255,255,.97);
+    border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)
+  }
+  nav.tabs .in{max-width:560px;margin:0 auto;display:flex;height:var(--nav-h)}
+  nav.tabs button{
+    flex:1;background:none;border:0;cursor:pointer;color:var(--muted);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+    font-size:.68rem;font-weight:600;position:relative
+  }
+  nav.tabs svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  nav.tabs button[aria-current=page]{color:var(--clay)}
+  nav.tabs .dot{position:absolute;top:9px;left:calc(50% + 8px);width:9px;height:9px;border-radius:50%;background:#C0392B;border:2px solid #fff}
+
   /* Gauge */
   .gauge-wrap{display:flex;flex-direction:column;align-items:center;text-align:center}
   .gauge{position:relative;width:200px;height:200px;margin:6px 0 10px}
@@ -104,39 +126,61 @@
   .daychip{display:inline-block;background:#EEF1EC;color:#55664F;border-radius:999px;padding:4px 12px;font-size:.8rem;font-weight:600;margin-bottom:8px}
   .journeynote{background:var(--cream);border:1px dashed var(--line);border-radius:12px;padding:10px 12px;margin-top:10px;font-size:.88rem;color:var(--muted)}
 
-  /* Honesty card */
+  /* Honesty */
   .honest{background:#F6EEE9;border-color:#E8D3C8}
-  .honest p.big{font-family:Lora,serif;font-size:1.08rem;color:#3b322d}
+  .honest p.big{font-family:Lora,serif;font-size:1.08rem;color:#3b322d;margin:0}
 
-  /* Roadmap */
-  .phase{border:1px solid var(--line);border-radius:14px;margin-bottom:10px;background:#fff;overflow:hidden}
-  .phase > summary{cursor:pointer;list-style:none;padding:13px 14px;display:flex;align-items:center;gap:10px}
-  .phase > summary::-webkit-details-marker{display:none}
+  /* Daily progress bar */
+  .bar-outer{height:14px;background:#EFE9DF;border-radius:999px;overflow:hidden;margin:8px 0}
+  .bar-inner{height:100%;width:0;background:var(--sage);border-radius:999px;transition:width .6s ease}
+  .bar-inner.full{background:var(--clay)}
+  .bigpct{font-family:Lora,serif;font-size:1.8rem;font-weight:700}
+
+  /* Reminder box */
+  .reminder{background:#FFF3E6;border:1.5px solid #E9B98A;border-radius:16px;padding:14px;margin-bottom:14px}
+  .reminder.urgent{background:#FDEBE7;border-color:#D98A7A}
+  .reminder b{display:block;margin-bottom:4px}
+  .reminder p{margin:0 0 10px;font-size:.93rem}
+
+  /* Steps */
+  .phase-head{display:flex;align-items:center;gap:10px;margin:18px 0 8px}
   .phase-num{background:var(--clay);color:#fff;border-radius:10px;padding:3px 9px;font-size:.74rem;font-weight:700;white-space:nowrap}
-  .phase-title{flex:1;font-family:Lora,serif;font-weight:600}
+  .phase-head h2{margin:0;flex:1;font-size:1.08rem}
   .phase-count{font-size:.8rem;color:var(--muted)}
-  .phase .body{padding:0 14px 6px}
-  .step{display:flex;gap:12px;padding:12px 0;border-top:1px dashed var(--line)}
-  .step input[type=checkbox]{flex:0 0 26px;width:26px;height:26px;accent-color:var(--clay);margin-top:2px}
-  .step.done .t{text-decoration:line-through;color:var(--muted)}
-  .step .why{font-size:.88rem;color:var(--muted);margin-top:4px}
+  .step{display:flex;gap:12px;padding:14px;background:#fff;border:1px solid var(--line);border-radius:16px;margin-bottom:10px}
+  .step input[type=checkbox]{flex:0 0 28px;width:28px;height:28px;accent-color:var(--clay);margin-top:2px}
+  .step.done{background:#F8F5EF}
+  .step.done .t{color:var(--muted)}
+  .step .t{font-weight:600}
+  .step .reflect{margin-top:8px;font-style:italic;font-family:Lora,serif;color:#4a423d;font-size:.95rem}
+  .step .why{font-size:.88rem;color:var(--muted);margin-top:8px}
   .step .why b{color:var(--sage)}
+  .hintbox{background:#EEF1EC;border-radius:14px;padding:12px 14px;font-size:.92rem;color:#42533E}
 
-  /* Reconnect + initiative */
-  .initiative{border:1.5px solid var(--sage);background:#F3F6F2;border-radius:14px;padding:14px;margin-top:12px}
-  .initiative .action{font-weight:600;margin:6px 0 10px}
-  .chk{display:flex;gap:10px;align-items:flex-start;padding:6px 0}
-  .chk input{width:24px;height:24px;accent-color:var(--sage);flex:0 0 24px;margin-top:2px}
+  /* Reconnect */
+  .bigtap{
+    display:block;width:100%;border:0;border-radius:20px;cursor:pointer;color:#fff;
+    background:var(--clay);padding:22px 16px;font-size:1.08rem;font-weight:700;line-height:1.35;
+    box-shadow:0 6px 16px rgba(196,116,87,.35)
+  }
+  .bigtap:active{background:var(--clay-dark);transform:scale(.99)}
+  .bigtap:disabled{opacity:.6;box-shadow:none}
+  .bigtap small{display:block;font-weight:500;font-size:.85rem;opacity:.92;margin-top:4px}
+  .aftertap{border:1.5px solid var(--sage);background:#F3F6F2;border-radius:16px;padding:14px;margin-top:14px}
   .log{list-style:none;margin-top:8px}
-  .log li{font-size:.86rem;color:var(--muted);padding:8px 0;border-top:1px dashed var(--line)}
-  .chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
-  .chip{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:8px 12px;font-size:.85rem;cursor:pointer}
-  .chip.sel{border-color:var(--clay);background:#F9EDE7;color:var(--clay-dark);font-weight:600}
+  .log li{font-size:.88rem;color:var(--muted);padding:8px 0;border-top:1px dashed var(--line)}
+  details.note summary{cursor:pointer;font-weight:600;font-size:.92rem;padding:8px 0;color:var(--muted)}
 
-  /* Activities + timer */
-  .activity{background:var(--cream);border:1px solid var(--line);border-radius:14px;padding:14px;margin:10px 0}
-  .activity b{display:block;font-family:Lora,serif;font-size:1.05rem;margin-bottom:4px}
-  .timer{font-family:Lora,serif;font-size:2.6rem;text-align:center;margin:6px 0;letter-spacing:.04em}
+  /* Activities */
+  .act{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--line);border-radius:14px;background:#fff;margin-bottom:8px}
+  .act.done{background:#F3F6F2;border-color:#CBD6C9}
+  .act .t{flex:1;word-break:break-word}
+  .act.done .t{color:var(--muted);text-decoration:line-through}
+  .act .x{background:none;border:0;color:var(--muted);font-size:1.4rem;cursor:pointer;padding:2px 8px}
+  .donebtn{flex:0 0 auto;border:1.5px solid var(--sage);background:#fff;color:#55664F;border-radius:999px;padding:8px 14px;font-weight:700;font-size:.88rem;cursor:pointer;min-height:40px}
+  .donebtn.on{background:var(--sage);color:#fff}
+  .sugg{display:block;width:100%;text-align:left;background:var(--cream);border:1px dashed #D9CFC0;border-radius:12px;padding:12px;margin-bottom:8px;cursor:pointer}
+  .sugg::before{content:"+ ";color:var(--clay);font-weight:700}
 
   /* Todos */
   .todo{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px dashed var(--line)}
@@ -147,20 +191,24 @@
   .seg{display:flex;gap:6px;margin:10px 0 4px}
   .seg button{flex:1;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:8px;font-size:.85rem;cursor:pointer}
   .seg button.on{border-color:var(--clay);background:#F9EDE7;color:var(--clay-dark);font-weight:600}
+  .daybar{display:flex;align-items:center;gap:10px;font-size:.88rem;padding:6px 0}
+  .daybar .d{flex:0 0 92px;color:var(--muted)}
+  .daybar .bar-outer{flex:1;margin:0;height:10px}
+  .daybar .p{flex:0 0 42px;text-align:right;font-weight:600}
 
-  details.plain{border:1px solid var(--line);border-radius:12px;padding:0 14px;margin-bottom:8px;background:#fff}
-  details.plain summary{cursor:pointer;font-weight:600;padding:12px 0;list-style:none}
-  details.plain summary::-webkit-details-marker{display:none}
-  details.plain p, details.plain ol{padding-bottom:10px;font-size:.93rem}
-  details.plain ol{padding-left:20px}
+  .backlink{display:inline-block;color:var(--clay-dark);font-weight:600;text-decoration:none;margin-bottom:10px}
 
+  /* Modal + toast */
+  .modal{position:fixed;inset:0;background:rgba(43,38,35,.45);z-index:60;display:flex;align-items:center;justify-content:center;padding:20px}
+  .modal .box{background:#fff;border-radius:20px;padding:20px;max-width:380px;width:100%}
+  .modal .box p{margin-bottom:14px}
   .toast{
-    position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translate(-50%,30px);
+    position:fixed;left:50%;bottom:calc(var(--nav-h) + 20px + env(safe-area-inset-bottom));transform:translate(-50%,30px);
     background:var(--ink);color:#fff;padding:12px 18px;border-radius:12px;font-size:.92rem;
     opacity:0;pointer-events:none;transition:.25s;z-index:50;max-width:90%;text-align:center
   }
   .toast.show{opacity:1;transform:translate(-50%,0)}
-  @media (prefers-reduced-motion:reduce){.gauge .bar,.toast{transition:none}}
+  @media (prefers-reduced-motion:reduce){.gauge .bar,.toast,.bar-inner{transition:none}}
 </style>
 </head>
 <body>
@@ -181,171 +229,268 @@
 
 <!-- ======================= APP ======================= -->
 <div id="app">
-<div class="wrap">
 
-  <div class="topbar">
-    <img src="./icon-192.png" alt="">
-    <div>
-      <p class="eyebrow" style="margin:0">Your transition companion</p>
-      <h1 id="appBrand">Moving On</h1>
-    </div>
-  </div>
-
-  <!-- Gauge -->
-  <div class="card gauge-wrap">
-    <span class="daychip" id="dayChip">Day 1</span>
-    <div class="gauge" role="img" aria-label="Moving-on progress">
-      <svg viewBox="0 0 200 200">
-        <circle class="track" cx="100" cy="100" r="82" fill="none" stroke-width="16"></circle>
-        <circle class="bar" id="gaugeBar" cx="100" cy="100" r="82" fill="none" stroke-width="16" stroke-linecap="round"
-                stroke-dasharray="515.22" stroke-dashoffset="515.22"></circle>
-      </svg>
-      <div class="num"><b id="pctNum">0%</b><span>moving on</span></div>
-    </div>
-    <p class="status" id="statusMsg"></p>
-    <div class="journeynote" id="journeyNote"></div>
-  </div>
-
-  <!-- Honesty reminder -->
-  <div class="card honest">
-    <p class="eyebrow" style="color:var(--clay)">A gentle reminder</p>
-    <p class="big"><strong>Be honest with yourself at the end of the day.</strong> This app only monitors your progress—your decisions and your pace are always yours.</p>
-  </div>
-
-  <!-- Roadmap -->
-  <div class="card">
-    <p class="eyebrow">Your roadmap</p>
-    <h2>4 phases, 12 steps</h2>
-    <p class="muted">Tap a phase to open it. Check a step when you've done it — go at your own pace.</p>
-    <div id="roadmap"></div>
-  </div>
-
-  <!-- Reconnect log -->
-  <div class="card" id="reconnectCard">
-    <p class="eyebrow">Setbacks happen</p>
-    <h2>Reconnect check-in</h2>
-    <p class="muted">If you reached out, checked their profile, or looked back — log it here without shame. Your percentage dips a little (−5%), then you take one small reset action to get your footing back.</p>
-    <div class="field">
-      <label class="lbl" for="reconnectNote">Optional note (what happened or what you felt)</label>
-      <textarea id="reconnectNote" placeholder="Only you see this."></textarea>
-    </div>
-    <button class="btn" id="reconnectBtn" type="button">I attempted to reconnect / checked in</button>
-
-    <div class="initiative" id="initiativeCard" style="display:none">
-      <p class="eyebrow" style="color:var(--sage)">Take a New Initiative</p>
-      <h3>One small reset to rebuild momentum</h3>
-      <p class="action" id="initiativeText"></p>
-      <label class="chk"><input type="checkbox" id="initiativeDone"><span>I did this reset (+2% momentum)</span></label>
-      <div class="row" style="margin-top:8px">
-        <button class="btn sage small" id="initiativeShuffle" type="button">Show me a different one</button>
+  <!-- ================= PAGE: HOME ================= -->
+  <section class="page" id="page-home" hidden>
+    <div class="wrap">
+      <div class="pagehead">
+        <p class="eyebrow">Your transition companion</p>
+        <h1 id="appBrand">Moving On</h1>
       </div>
-      <p class="muted" style="margin:12px 0 4px">Or pick your own:</p>
-      <div class="chips" id="initiativeChips"></div>
+
+      <div class="card gauge-wrap">
+        <span class="daychip" id="dayChip">Day 1</span>
+        <div class="gauge" role="img" aria-label="Moving-on progress">
+          <svg viewBox="0 0 200 200">
+            <circle class="track" cx="100" cy="100" r="82" fill="none" stroke-width="16"></circle>
+            <circle class="bar" id="gaugeBar" cx="100" cy="100" r="82" fill="none" stroke-width="16" stroke-linecap="round"
+                    stroke-dasharray="515.22" stroke-dashoffset="515.22"></circle>
+          </svg>
+          <div class="num"><b id="pctNum">0%</b><span>moving on</span></div>
+        </div>
+        <p class="status" id="statusMsg"></p>
+        <div class="journeynote" id="journeyNote"></div>
+      </div>
+
+      <div id="homeReminder"></div>
+
+      <div class="card">
+        <p class="eyebrow">Today</p>
+        <h2>Daily routine</h2>
+        <div class="bigpct" id="homeDailyPct">0%</div>
+        <div class="bar-outer"><div class="bar-inner" id="homeDailyBar"></div></div>
+        <p class="muted" id="homeDailyText"></p>
+        <p class="muted" id="homeYesterday"></p>
+        <a class="btn" href="#today">Open today's plan</a>
+      </div>
+
+      <div class="card">
+        <p class="eyebrow">Your next step</p>
+        <p id="nextStepText" style="font-weight:600"></p>
+        <a class="btn ghost" href="#steps">See all steps</a>
+      </div>
+
+      <div class="card honest">
+        <p class="eyebrow" style="color:var(--clay)">A gentle reminder</p>
+        <p class="big"><strong>Be honest with yourself at the end of the day.</strong> This app only monitors your progress—your decisions and your pace are always yours.</p>
+      </div>
+
+      <p style="text-align:center"><a class="backlink" href="#backup">Backup &amp; restore my progress</a></p>
     </div>
+  </section>
 
-    <h3 style="margin-top:16px">Recent check-ins</h3>
-    <ul class="log" id="reconnectLog"></ul>
-  </div>
-
-  <!-- Focus shift -->
-  <div class="card">
-    <p class="eyebrow">When overthinking hits</p>
-    <h2>Need a Focus Shift? Pick a 5-Minute Reset</h2>
-    <p class="muted">Low pressure. Pick one, start the timer, and let it be a small break.</p>
-    <div class="activity" id="activityBox"></div>
-    <div class="row">
-      <button class="btn ghost small" id="activityRandom" type="button">Surprise me</button>
+  <!-- ================= PAGE: STEPS ================= -->
+  <section class="page" id="page-steps" hidden>
+    <div class="wrap">
+      <div class="pagehead">
+        <p class="eyebrow">Your roadmap</p>
+        <h1>4 phases, 12 steps</h1>
+        <p class="muted">Go at your own pace. Tick a step when you've done it.</p>
+      </div>
+      <div class="hintbox">No need to write anything down. You can <strong>think it</strong>, <strong>say it out loud</strong>, or write it — whatever feels natural to you. Each step has a question to ask yourself.</div>
+      <div id="roadmap"></div>
     </div>
-    <div class="chips" id="activityChips"></div>
-    <div class="timer" id="timerDisplay">5:00</div>
-    <div class="row">
-      <button class="btn small" id="timerStart" type="button">Start</button>
-      <button class="btn ghost small" id="timerPause" type="button">Pause</button>
-      <button class="btn ghost small" id="timerReset" type="button">Reset</button>
+  </section>
+
+  <!-- ================= PAGE: TODAY ================= -->
+  <section class="page" id="page-today" hidden>
+    <div class="wrap">
+      <div class="pagehead">
+        <p class="eyebrow" id="todayDate"></p>
+        <h1>Today's plan</h1>
+        <p class="muted">Pick a few small activities for today — from the ideas below or your own. Tap <strong>Done</strong> when you've done one.</p>
+      </div>
+
+      <div class="card">
+        <h3>Today's routine</h3>
+        <div class="bigpct" id="todayPct">0%</div>
+        <div class="bar-outer"><div class="bar-inner" id="todayBar"></div></div>
+        <p class="muted" id="todayText"></p>
+      </div>
+
+      <div id="todayReminder"></div>
+
+      <div class="card">
+        <h2>My activities for today</h2>
+        <div id="planList"></div>
+        <form id="ownForm" class="row" style="flex-wrap:nowrap;margin-top:10px">
+          <input type="text" id="ownInput" placeholder="Add your own activity" maxlength="100" aria-label="Your own activity">
+          <button class="btn small" type="submit" style="flex:0 0 auto">Add</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Ideas for you</h2>
+        <p class="muted">Tap one to add it to today.</p>
+        <div id="suggList"></div>
+        <button class="btn ghost small" id="suggShuffle" type="button">Show different ideas</button>
+      </div>
     </div>
-  </div>
+  </section>
 
-  <!-- Daily check-in -->
-  <div class="card">
-    <p class="eyebrow">End of day</p>
-    <h2>Honesty check-in</h2>
-    <p class="muted" id="checkinDate"></p>
-    <div class="field">
-      <label class="lbl" for="checkinSelect">How did today go with your own boundaries?</label>
-      <select id="checkinSelect">
-        <option value="">Choose one…</option>
-        <option value="steady">I kept my boundaries today</option>
-        <option value="mixed">A mixed day — some wins, some wobbles</option>
-        <option value="slipped">I slipped today, and I'm okay with starting again</option>
-        <option value="resting">I mostly rested and got through it</option>
-      </select>
+  <!-- ================= PAGE: RECONNECT ================= -->
+  <section class="page" id="page-reconnect" hidden>
+    <div class="wrap">
+      <div class="pagehead">
+        <p class="eyebrow">It happens</p>
+        <h1>I tried to reconnect</h1>
+      </div>
+
+      <div class="card">
+        <p><strong>How this works:</strong> if you tried to reconnect with your ex, or checked their profile, tap the big button below. <strong>Tap it once</strong> each time it happens.</p>
+        <p class="muted">That's all — nothing to write. Your moving-on percentage goes down a little (5%) so you can see things honestly, and you can climb right back up.</p>
+        <button class="bigtap" id="reconnectBtn" type="button">I tried to reconnect / checked their profile<small>Tap once. No judgment.</small></button>
+        <p class="muted" style="margin:12px 0 0;text-align:center" id="reconnectToday"></p>
+
+        <details class="note" style="margin-top:8px">
+          <summary>Add a note (optional)</summary>
+          <textarea id="reconnectNote" placeholder="Only you see this. It will be saved with your next tap."></textarea>
+        </details>
+
+        <div class="aftertap" id="afterTap" hidden>
+          <h3>Logged. Thank you for being honest.</h3>
+          <p class="muted">Now do one small thing for yourself. Tap an idea to add it to today:</p>
+          <div id="afterTapIdeas"></div>
+          <div class="row" style="margin-top:6px">
+            <a class="btn ghost small" href="#today">See all ideas</a>
+            <button class="btn ghost small" id="undoBtn" type="button">Undo (I tapped by mistake)</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Recent taps</h3>
+        <ul class="log" id="reconnectLog"></ul>
+      </div>
     </div>
-    <div class="field">
-      <label class="lbl" for="checkinNote">Private reflection (optional)</label>
-      <textarea id="checkinNote" placeholder="What's one honest thing about today?"></textarea>
+  </section>
+
+  <!-- ================= PAGE: REFLECT ================= -->
+  <section class="page" id="page-reflect" hidden>
+    <div class="wrap">
+      <div class="pagehead">
+        <p class="eyebrow">End of day</p>
+        <h1>Honesty check-in</h1>
+        <p class="muted" id="checkinDate"></p>
+      </div>
+
+      <div class="card honest">
+        <p class="big"><strong>Be honest with yourself at the end of the day.</strong> This app only monitors your progress—your decisions and your pace are always yours.</p>
+      </div>
+
+      <div class="card">
+        <p class="eyebrow">A question to sit with</p>
+        <p style="font-family:Lora,serif;font-size:1.08rem" id="dailyQuestion"></p>
+        <p class="muted">Think about it, or say your answer out loud. Writing is optional.</p>
+      </div>
+
+      <div class="card">
+        <div class="field">
+          <label class="lbl" for="checkinSelect">How did today go with your own boundaries?</label>
+          <select id="checkinSelect">
+            <option value="">Choose one…</option>
+            <option value="steady">I kept my boundaries today</option>
+            <option value="mixed">A mixed day — some wins, some wobbles</option>
+            <option value="slipped">I slipped today, and I'm okay with starting again</option>
+            <option value="resting">I mostly rested and got through it</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="lbl" for="checkinNote">Private reflection (optional)</label>
+          <textarea id="checkinNote" placeholder="One honest line about today, if you want."></textarea>
+        </div>
+        <button class="btn" id="checkinSave" type="button">Save today's check-in</button>
+      </div>
+
+      <div class="card">
+        <h3>Recent days</h3>
+        <ul class="log" id="checkinLog"></ul>
+      </div>
     </div>
-    <button class="btn" id="checkinSave" type="button">Save today's check-in</button>
-    <h3 style="margin-top:16px">Recent days</h3>
-    <ul class="log" id="checkinLog"></ul>
-  </div>
+  </section>
 
-  <!-- Todos -->
-  <div class="card">
-    <p class="eyebrow">Small wins</p>
-    <h2>My moving-on to-do list</h2>
-    <p class="muted">Each task you finish gives your progress a small boost (+1%, once per task).</p>
-    <form id="todoForm" class="row" style="flex-wrap:nowrap;margin-top:8px">
-      <input type="text" id="todoInput" placeholder="e.g. Go for a 10-minute walk" maxlength="120" aria-label="New task">
-      <button class="btn small" type="submit" style="flex:0 0 auto">Add</button>
-    </form>
-    <div class="seg" id="todoFilter">
-      <button type="button" data-f="all" class="on">All</button>
-      <button type="button" data-f="active">Active</button>
-      <button type="button" data-f="done">Done</button>
+  <!-- ================= PAGE: WINS ================= -->
+  <section class="page" id="page-wins" hidden>
+    <div class="wrap">
+      <div class="pagehead">
+        <p class="eyebrow">Small wins</p>
+        <h1>My wins</h1>
+        <p class="muted">Add small things you want to do. Each one you finish gives your progress a small boost (+1%, once per task). Everything is saved on your phone to keep you on track.</p>
+      </div>
+
+      <div class="card">
+        <h2>To-do list</h2>
+        <form id="todoForm" class="row" style="flex-wrap:nowrap">
+          <input type="text" id="todoInput" placeholder="e.g. Go for a walk" maxlength="120" aria-label="New task">
+          <button class="btn small" type="submit" style="flex:0 0 auto">Add</button>
+        </form>
+        <div class="seg" id="todoFilter">
+          <button type="button" data-f="all" class="on">All</button>
+          <button type="button" data-f="active">Active</button>
+          <button type="button" data-f="done">Done</button>
+        </div>
+        <div id="todoList"></div>
+        <button class="btn ghost small" id="todoClear" type="button" style="margin-top:10px">Save completed to my wins</button>
+      </div>
+
+      <div class="card">
+        <h2>Wins I've saved</h2>
+        <p class="muted" id="winsCount"></p>
+        <ul class="log" id="winsList"></ul>
+      </div>
+
+      <div class="card">
+        <h2>Daily routine history</h2>
+        <p class="muted" id="streakText"></p>
+        <div id="dayHistory"></div>
+      </div>
     </div>
-    <div id="todoList"></div>
-    <button class="btn ghost small" id="todoClear" type="button" style="margin-top:10px">Clear completed</button>
-  </div>
+  </section>
 
-  <!-- Backup -->
-  <div class="card">
-    <p class="eyebrow">Keep it safe</p>
-    <h2>Copy / Restore Backup</h2>
-    <p class="muted">Your progress lives only on this phone. Copy your backup and save it somewhere safe (a note to yourself works), or paste a backup here to restore on a new phone.</p>
-    <textarea id="backupBox" placeholder="Your backup will appear here, or paste a backup to restore." style="min-height:110px;font-size:13px"></textarea>
-    <div class="row" style="margin-top:8px">
-      <button class="btn small" id="backupMake" type="button">Create backup</button>
-      <button class="btn ghost small" id="backupCopy" type="button">Copy</button>
-      <button class="btn ghost small" id="backupRestore" type="button">Restore</button>
+  <!-- ================= PAGE: BACKUP ================= -->
+  <section class="page" id="page-backup" hidden>
+    <div class="wrap">
+      <a class="backlink" href="#home">← Back to Home</a>
+      <div class="pagehead">
+        <p class="eyebrow">Keep it safe</p>
+        <h1>Backup &amp; restore</h1>
+        <p class="muted">Your progress lives only on this phone. Copy your backup and save it somewhere safe (a note to yourself works), or paste a backup here to restore it on a new phone.</p>
+      </div>
+      <div class="card">
+        <textarea id="backupBox" placeholder="Your backup will appear here, or paste a backup to restore." style="min-height:140px;font-size:16px"></textarea>
+        <div class="row" style="margin-top:8px">
+          <button class="btn small" id="backupMake" type="button">Create backup</button>
+          <button class="btn ghost small" id="backupCopy" type="button">Copy</button>
+          <button class="btn ghost small" id="backupRestore" type="button">Restore</button>
+        </div>
+      </div>
+      <p class="muted" style="text-align:center">This is a 30–90 day companion. The goal is to build momentum and graduate — a life that doesn't need this app. Be kind to yourself.</p>
     </div>
-  </div>
+  </section>
 
-  <!-- Home screen guide -->
-  <div class="card">
-    <p class="eyebrow">Make it an app</p>
-    <h2>Add to Home Screen</h2>
-    <details class="plain">
-      <summary>iPhone (Safari)</summary>
-      <ol>
-        <li>Open this page in <strong>Safari</strong>.</li>
-        <li>Tap the <strong>Share</strong> button.</li>
-        <li>Scroll and tap <strong>Add to Home Screen</strong>, then <strong>Add</strong>.</li>
-      </ol>
-    </details>
-    <details class="plain">
-      <summary>Android (Chrome)</summary>
-      <ol>
-        <li>Open this page in <strong>Chrome</strong>.</li>
-        <li>Tap the <strong>Menu ⋮</strong> at the top right.</li>
-        <li>Choose <strong>Install app</strong> or <strong>Add to Home screen</strong>, then confirm.</li>
-      </ol>
-    </details>
-    <p class="muted"><strong>Tip:</strong> If you opened this link inside another app's built-in browser, tap its menu and choose "Open in Safari" or "Open in Chrome" first. Home Screen install only works from the real browser.</p>
-  </div>
-
-  <p class="muted" style="text-align:center;margin-top:20px">This is a 30–90 day companion. The goal is to build momentum and graduate — a life that doesn't need this app. Be kind to yourself.</p>
-
+  <!-- Bottom navigation -->
+  <nav class="tabs" aria-label="Main">
+    <div class="in">
+      <button type="button" data-page="home"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v10h-6v-6H9v6H3z"/></svg>Home</button>
+      <button type="button" data-page="steps"><svg viewBox="0 0 24 24"><path d="M4 6l1.5 1.5L8 5M4 12l1.5 1.5L8 11M4 18l1.5 1.5L8 17M11 6h9M11 12h9M11 18h9"/></svg>Steps</button>
+      <button type="button" data-page="today" id="navToday"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>Today<span class="dot" id="navDot" hidden></span></button>
+      <button type="button" data-page="reconnect"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 14-5M20 4v4h-4M20 12a8 8 0 0 1-14 5M4 20v-4h4"/></svg>Reconnect</button>
+      <button type="button" data-page="reflect"><svg viewBox="0 0 24 24"><path d="M20 14a8 8 0 1 1-10-10 6 6 0 0 0 10 10z"/></svg>Reflect</button>
+      <button type="button" data-page="wins"><svg viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>Wins</button>
+    </div>
+  </nav>
 </div>
+
+<!-- Reminder pop-up -->
+<div class="modal" id="modal" hidden>
+  <div class="box" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <h2 id="modalTitle">A gentle reminder</h2>
+    <p id="modalText"></p>
+    <div class="row">
+      <a class="btn" id="modalGo" href="#today">Go to today's plan</a>
+      <button class="btn ghost" id="modalClose" type="button">Later</button>
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -354,69 +499,105 @@
 (function () {
   'use strict';
 
+  /* ===================== KEEP THE SCREEN STEADY (no pinch / double-tap zoom) ===================== */
+  ['gesturestart', 'gesturechange', 'gestureend'].forEach(function (ev) {
+    document.addEventListener(ev, function (e) { e.preventDefault(); });
+  });
+  document.addEventListener('touchmove', function (e) {
+    if (e.touches && e.touches.length > 1) e.preventDefault();
+  }, { passive: false });
+
   /* ===================== DATA ===================== */
   var PHASES = [
     { id: 1, title: 'Radical Acceptance', steps: [
-      { id: 's1',  text: 'Write down the plain facts of what ended (no "if only" or "what if").',
-        why: 'Plain facts stop your mind from bargaining with reality. You can\'t move away from something you\'re still negotiating with.' },
-      { id: 's2',  text: 'Name three feelings you have right now, out loud or on paper.',
-        why: 'Naming a feeling lowers its intensity and turns it into something you can work with instead of something that runs you.' },
-      { id: 's3',  text: 'Say once, out loud: "This chapter is over, and I will be okay."',
-        why: 'Hearing your own voice say it starts turning a painful idea into an accepted fact, which is where healing begins.' }
+      { id: 's1',
+        text: 'Say out loud, just to yourself: "It\'s over, and I\'m learning to accept that."',
+        reflect: 'Ask yourself: How did it feel to say that? Where do I feel it in my body?',
+        why: 'Hearing your own voice say it helps your mind start treating it as real. Acceptance begins when you stop arguing with what already happened.' },
+      { id: 's2',
+        text: 'Think back and tell yourself, in your head or out loud, what really happened between you two. Just the facts, no "what ifs."',
+        reflect: 'Ask yourself: Was the relationship good for me all the time, or only some of the time?',
+        why: 'When you stay with the plain facts, your mind has less room to replay a happier version that never fully existed.' },
+      { id: 's3',
+        text: 'Name how you feel right now, out loud. Sad? Angry? Lonely? Relieved? Pick the words that fit.',
+        reflect: 'Ask yourself: What is the biggest feeling today, and what is it trying to tell me?',
+        why: 'Naming a feeling makes it smaller and easier to handle. Feelings with no name tend to run the show.' }
     ]},
     { id: 2, title: 'Processing Without Spiraling', steps: [
-      { id: 's4',  text: 'Set a daily 15-minute "feelings window" and keep to it.',
-        why: 'Giving grief a time and place keeps it from leaking into every hour of your day and exhausting you.' },
-      { id: 's5',  text: 'Write an unsent letter to them — and keep it unsent.',
-        why: 'You get to say everything without consequences, so the words stop circling in your head.' },
-      { id: 's6',  text: 'Tell one trusted person how you really are doing.',
-        why: 'Carrying it alone makes it heavier. One honest conversation can lighten more than a week of coping in silence.' }
+      { id: 's4',
+        text: 'Pick one time each day (like after dinner) to let yourself think and feel about them. Outside that time, tell yourself: "Not now, later."',
+        reflect: 'Ask yourself: When do my thoughts about them get loudest, and what usually sets it off?',
+        why: 'Giving sadness its own time stops it from taking over your whole day. You are not ignoring it — you are scheduling it.' },
+      { id: 's5',
+        text: 'Say what you wish you could tell them. Say it out loud when you\'re alone, or record a voice note to yourself. Do not send it.',
+        reflect: 'Ask yourself: What do I really need to hear — from them, or from myself?',
+        why: 'You get to say everything with no consequences. Once it is out of your head, it stops going in circles.' },
+      { id: 's6',
+        text: 'Talk to one person you trust about how you\'re really doing. A call, a chat, or in person.',
+        reflect: 'Ask yourself: Who makes me feel safe being honest? Can I reach out to them today?',
+        why: 'Carrying it alone makes it heavier. One honest talk can lift more than a week of keeping it inside.' }
     ]},
     { id: 3, title: 'Boundaries & Detox', steps: [
-      { id: 's7',  text: 'Mute, archive, or hide their messages, updates, and notifications.',
-        why: 'Every reminder restarts the urge to check. Less exposure means fewer urges to fight each day.' },
-      { id: 's8',  text: 'Box up physical reminders (photos, gifts) for 30 days.',
-        why: 'Out of sight gives your nervous system room to settle. Nothing is thrown away — you\'re just creating space.' },
-      { id: 's9',  text: 'Write your own "if I feel the urge to reach out" plan.',
-        why: 'Decisions made while calm beat decisions made at 11 p.m. A plan you wrote yourself is easier to follow.' }
+      { id: 's7',
+        text: 'Mute, hide, or unfollow them so you don\'t see their posts or messages. You\'re not erasing them forever — just giving yourself space.',
+        reflect: 'Ask yourself: How do I feel after I see something about them?',
+        why: 'Every reminder sets off the urge to check. Less to see means less to fight each day.' },
+      { id: 's8',
+        text: 'Put things that remind you of them (photos, gifts) out of sight for 30 days. A box or a drawer is enough.',
+        reflect: 'Ask yourself: Which reminder hurts the most? Can I put that one away first?',
+        why: 'Out of sight gives your mind room to calm down. Nothing is thrown away — you\'re just making space.' },
+      { id: 's9',
+        text: 'Make your own rule and say it out loud: "When I feel like reaching out, I will ___ instead."',
+        reflect: 'Ask yourself: What would I tell a good friend to do in this exact moment?',
+        why: 'A decision made when you\'re calm is easier to keep than one made late at night. A rule in your own words is the one you\'ll follow.' }
     ]},
     { id: 4, title: 'Rebuilding Your Identity', steps: [
-      { id: 's10', text: 'List 5 things that are yours alone: values, hobbies, strengths.',
-        why: 'Relationships can blur who you are. Reconnecting with your own interests rebuilds a steady sense of self.' },
-      { id: 's11', text: 'Schedule one thing just for you this week, with a day and time.',
-        why: 'Moving on is built from actions, not intentions. A booked plan turns "someday" into "Saturday."' },
-      { id: 's12', text: 'Write a short note from you, 90 days from now.',
-        why: 'Picturing an ordinary good day ahead gives your mind something to walk toward, not only away from.' }
+      { id: 's10',
+        text: 'Think of 3 things you like about yourself that have nothing to do with them. Say them out loud.',
+        reflect: 'Ask yourself: What was I good at, or what did I love doing, before this relationship?',
+        why: 'Relationships can blur who you are. Remembering your own strengths rebuilds a steady sense of self.' },
+      { id: 's11',
+        text: 'Pick one thing just for you this week and decide when you\'ll do it (a walk, a favorite meal, a hobby).',
+        reflect: 'Ask yourself: What would make me feel a little more like myself this week?',
+        why: 'Moving on is built from actions, not just intentions. A plan with a day and time turns "someday" into "Saturday."' },
+      { id: 's12',
+        text: 'Close your eyes and picture yourself 3 months from now, doing well. Describe that day out loud to yourself.',
+        reflect: 'Ask yourself: What does a good ordinary day look like for me — and what is one small step toward it?',
+        why: 'Picturing a good future gives your mind something to walk toward, not just something to run from.' }
     ]}
   ];
   var TOTAL_STEPS = 12;
 
-  var INITIATIVES = [
-    'Mute or archive their name everywhere for the next 24 hours.',
-    'Do a 5-minute no-send brain dump: write everything you want to say, then close the page without sending.',
-    'Put your phone in another room for 30 minutes.',
-    'Text a friend or family member instead and ask for a short call or walk.',
-    'Take a 10-minute walk outside without headphones or scrolling.',
-    'Delete the draft message you were writing, then drink a full glass of water.',
-    'Re-read your "if I feel the urge" plan (Phase 3) and add one more line to it.',
-    'Tidy one small space — a desk, a drawer, a corner of your room — for 10 minutes.'
+  var SUGGESTIONS = [
+    'Go for a short walk outside',
+    'Put on one song and move or stretch until it ends',
+    'Put your phone in another room for 30 minutes',
+    'Mute or hide their name everywhere for today',
+    'Call or chat with a friend or family member',
+    'Tidy one small space, like a desk or a drawer',
+    'Splash cool water on your face and breathe slowly 5 times',
+    'Name 5 things you see, 4 you can touch, 3 you hear, 2 you smell, 1 you taste',
+    'Say out loud 3 things you don\'t miss about the relationship',
+    'Say out loud 3 things you\'re proud of yourself for',
+    'Make a snack or drink you like and enjoy it slowly',
+    'Take a shower and put on clean, comfy clothes',
+    'Doodle or draw anything for a few minutes',
+    'Watch or listen to something that makes you laugh',
+    'Do something you used to enjoy before the relationship',
+    'Tell yourself what you\'d tell a friend in your situation'
   ];
 
-  var ACTIVITIES = [
-    { t: '2-Minute Room Reset', d: 'Set a timer and put away or straighten as many things as you can in one small area.' },
-    { t: 'One Song, Full Body', d: 'Put on one song you love and move, stretch, or dance badly until it ends.' },
-    { t: 'Three Things I Don\'t Miss', d: 'Write down 3 honest things you don\'t miss. Small ones count.' },
-    { t: '5-4-3-2-1 Grounding', d: 'Notice 5 things you see, 4 you can touch, 3 you hear, 2 you smell, 1 you taste.' },
-    { t: 'Cold Water Reset', d: 'Wash your face or hands with cool water and take five slow breaths.' },
-    { t: 'Quick Doodle', d: 'Draw anything for 3 minutes — shapes, lines, a silly creature. It doesn\'t need to be good.' },
-    { t: 'Brain Dump', d: 'Write everything in your head without editing. Then close the page.' },
-    { t: 'Box Breathing', d: 'Breathe in for 4, hold for 4, out for 4, hold for 4. Repeat 5 times.' },
-    { t: 'Stretch Break', d: 'Roll your shoulders, reach overhead, touch your toes, and shake out your hands.' },
-    { t: 'Tiny Gratitude List', d: 'Write 3 small things from today that were okay or even nice.' },
-    { t: 'Snack and Sit', d: 'Make a simple snack or drink and enjoy it slowly without a screen.' },
-    { t: 'Window Watch', d: 'Look out a window for 2 minutes and count every color or movement you notice.' },
-    { t: 'Future Me Wishlist', d: 'List 3 small things you\'d like to try in the next month.' },
-    { t: 'Compliment Yourself', d: 'Write one kind sentence you\'d say to a friend in your situation, then read it to yourself.' }
+  var QUESTIONS = [
+    'What is one thing I handled better today than I would have a month ago?',
+    'What do I need most right now: rest, company, or time alone?',
+    'What am I afraid will happen if I stop thinking about them?',
+    'Who or what made me smile, even a little, this week?',
+    'What did I learn about myself from this relationship?',
+    'If I felt no pressure, what would I want my next week to look like?',
+    'What am I still holding on to that I could gently put down?',
+    'What would I like to say to myself on my hardest day?',
+    'What is one boundary that is helping me right now?',
+    'What part of my life is just mine, no matter who is in it?'
   ];
 
   var STATUS = [
@@ -430,20 +611,27 @@
   ];
 
   /* ===================== STATE ===================== */
-  var STORE_KEY  = 'moveon_state_v1';
+  var STORE_KEY  = 'moveon_state_v2';
+  var OLD_KEY    = 'moveon_state_v1';
   var UNLOCK_KEY = 'moveon_unlocked_v1';
 
   function defaultState() {
-    return { startedAt: Date.now(), steps: {}, bonus: 0, reconnects: [], initiatives: [],
-             activeInitiative: null, todos: [], checkins: {} };
+    return { startedAt: Date.now(), steps: {}, bonus: 0, reconnects: [], days: {}, todos: [], wins: [], checkins: {} };
   }
   function loadState() {
     try {
       var raw = localStorage.getItem(STORE_KEY);
-      if (!raw) return defaultState();
-      var parsed = JSON.parse(raw);
-      return Object.assign(defaultState(), parsed);
-    } catch (e) { return defaultState(); }
+      if (raw) return Object.assign(defaultState(), JSON.parse(raw));
+      var old = localStorage.getItem(OLD_KEY);
+      if (old) {
+        var o = JSON.parse(old), s = defaultState();
+        ['startedAt', 'steps', 'bonus', 'reconnects', 'todos', 'checkins'].forEach(function (k) {
+          if (o[k] !== undefined) s[k] = o[k];
+        });
+        return s;
+      }
+    } catch (e) {}
+    return defaultState();
   }
   var state = loadState();
   var saveWarned = false;
@@ -462,10 +650,12 @@
     clearTimeout(toastTimer);
     toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2400);
   }
-  function todayKey() {
-    var d = new Date();
+  function dateKey(d) {
+    d = d || new Date();
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   }
+  function todayKey() { return dateKey(new Date()); }
+  function yesterdayKey() { var d = new Date(); d.setDate(d.getDate() - 1); return dateKey(d); }
   function fmtDateTime(ts) {
     try { return new Date(ts).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }); }
     catch (e) { return new Date(ts).toString(); }
@@ -478,31 +668,82 @@
     if (text !== undefined) e.textContent = text;
     return e;
   }
+  function plural(n, one, many) { return n + ' ' + (n === 1 ? one : many); }
 
-  /* ===================== PERCENTAGE ===================== */
+  /* ===================== MOVING-ON PERCENTAGE ===================== */
   function stepsDone() {
     var n = 0; Object.keys(state.steps).forEach(function (k) { if (state.steps[k]) n++; }); return n;
   }
-  function stepsPart() { return (stepsDone() / TOTAL_STEPS) * 80; }  // steps are worth up to 80%
+  function stepsPart() { return (stepsDone() / TOTAL_STEPS) * 80; }   // the 12 steps are worth up to 80%
   function percent() { return clamp(Math.round(stepsPart() + state.bonus), 0, 100); }
-  // Bonus (small wins from to-dos and resets, minus setbacks) is kept within a sensible range
+  // "Bonus" holds small wins (+1 each), minus reconnect taps (-5 each); kept in a sensible range
   function setBonus(b) { state.bonus = clamp(b, -80, 20); }
   function setPercentTarget(target) { setBonus(clamp(target, 0, 100) - stepsPart()); }
 
-  /* ===================== GAUGE ===================== */
+  /* ===================== DAILY ROUTINE ===================== */
+  function getDay(key) {
+    if (!state.days[key]) state.days[key] = { activities: [] };
+    return state.days[key];
+  }
+  function dailyInfo(key) {
+    var d = state.days[key] || { activities: [] };
+    var acts = d.activities || [];
+    var doneActs = acts.filter(function (a) { return a.done; }).length;
+    var checked = !!state.checkins[key];
+    var total = acts.length + 1;                     // activities + the end-of-day check-in
+    var done = doneActs + (checked ? 1 : 0);
+    var pct = acts.length === 0 ? 0 : Math.round((done / total) * 100);
+    return {
+      acts: acts, doneActs: doneActs, checked: checked, total: total, done: done, pct: pct,
+      pending: acts.filter(function (a) { return !a.done; })
+    };
+  }
+  function addActivity(text) {
+    text = String(text || '').trim();
+    if (!text) return false;
+    var d = getDay(todayKey());
+    var exists = d.activities.some(function (a) { return a.text.toLowerCase() === text.toLowerCase(); });
+    if (exists) { toast('That one is already in today\'s plan.'); return false; }
+    d.activities.push({ id: uid(), text: text, done: false, credited: false });
+    save(); renderAll();
+    toast('Added to today\'s plan.');
+    return true;
+  }
+
+  /* ===================== ROUTING (separate pages) ===================== */
+  var PAGES = ['home', 'steps', 'today', 'reconnect', 'reflect', 'wins', 'backup'];
+  var justLogged = false;
+  function currentPage() {
+    var p = (location.hash || '#home').slice(1);
+    return PAGES.indexOf(p) < 0 ? 'home' : p;
+  }
+  function showPage() {
+    var p = currentPage();
+    PAGES.forEach(function (id) { $('page-' + id).hidden = (id !== p); });
+    document.querySelectorAll('nav.tabs button').forEach(function (b) {
+      if (b.dataset.page === p) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+    });
+    if (p !== 'reconnect') { justLogged = false; $('afterTap').hidden = true; }
+    window.scrollTo(0, 0);
+    renderAll();
+  }
+  document.querySelectorAll('nav.tabs button').forEach(function (b) {
+    b.addEventListener('click', function () { location.hash = '#' + b.dataset.page; });
+  });
+  window.addEventListener('hashchange', function () { if (isUnlocked()) showPage(); });
+
+  /* ===================== RENDER: HOME ===================== */
   var CIRC = 2 * Math.PI * 82;
   var shownPct = 0, animFrame = null;
   function renderGauge() {
     var p = percent();
     $('gaugeBar').style.strokeDashoffset = String(CIRC * (1 - p / 100));
-    // animate the number
     cancelAnimationFrame(animFrame);
     var from = shownPct, start = null, dur = 700;
     function tick(ts) {
       if (start === null) start = ts;
       var k = Math.min(1, (ts - start) / dur);
-      var v = Math.round(from + (p - from) * k);
-      $('pctNum').textContent = v + '%';
+      $('pctNum').textContent = Math.round(from + (p - from) * k) + '%';
       if (k < 1) animFrame = requestAnimationFrame(tick); else shownPct = p;
     }
     animFrame = requestAnimationFrame(tick);
@@ -525,198 +766,242 @@
     $('journeyNote').textContent = note;
   }
 
-  /* ===================== ROADMAP ===================== */
-  function renderRoadmap() {
-    var host = $('roadmap');
-    var openIds = [];
-    host.querySelectorAll('details[open]').forEach(function (d) { openIds.push(d.dataset.phase); });
-    var firstRender = host.children.length === 0;
-    host.innerHTML = '';
+  function reminderBox(info, withButton) {
+    var hour = new Date().getHours();
+    var needCheckin = info.acts.length > 0 && !info.checked && hour >= TRACKER_CONFIG.CHECKIN_HOUR && info.pending.length === 0;
+    if (!info.pending.length && !needCheckin) return null;
+    var evening = hour >= TRACKER_CONFIG.EVENING_HOUR;
+    var box = el('div', 'reminder' + (evening ? ' urgent' : ''));
+    box.setAttribute('role', 'alert');
+    if (info.pending.length) {
+      box.appendChild(el('b', null, evening ? 'The day is ending — don\'t forget to mark your activities' : 'Don\'t forget to mark your activities'));
+      var names = info.pending.slice(0, 3).map(function (a) { return a.text; }).join(' • ');
+      box.appendChild(el('p', null,
+        'You still have ' + plural(info.pending.length, 'activity', 'activities') + ' not marked done (' + names + (info.pending.length > 3 ? ' …' : '') +
+        '). If you did ' + (info.pending.length === 1 ? 'it' : 'them') + ', tap Done. Anything not marked done means today won\'t reach 100%.'));
+    } else {
+      box.appendChild(el('b', null, 'Last step for today'));
+      box.appendChild(el('p', null, 'All your activities are done. Finish with your end-of-day check-in to reach 100%.'));
+    }
+    if (withButton) {
+      var a = el('a', 'btn small', info.pending.length ? 'Go to today\'s plan' : 'Do my check-in');
+      a.href = info.pending.length ? '#today' : '#reflect';
+      box.appendChild(a);
+    }
+    return box;
+  }
+
+  function renderDailyBar(pctEl, barEl, info) {
+    pctEl.textContent = info.pct + '%';
+    barEl.style.width = info.pct + '%';
+    barEl.classList.toggle('full', info.pct >= 100);
+  }
+  function dailyText(info) {
+    if (!info.acts.length) return 'Pick at least one activity for today to start your routine.';
+    return info.done + ' of ' + info.total + ' done (' + plural(info.acts.length, 'activity', 'activities') + ' + end-of-day check-in).';
+  }
+
+  function renderHome() {
+    renderGauge();
+    $('appBrand').textContent = TRACKER_CONFIG.BRAND_NAME;
+    var info = dailyInfo(todayKey());
+    renderDailyBar($('homeDailyPct'), $('homeDailyBar'), info);
+    $('homeDailyText').textContent = dailyText(info);
+    var y = dailyInfo(yesterdayKey());
+    $('homeYesterday').textContent = y.acts.length ? 'Yesterday ended at ' + y.pct + '%. Today is a fresh start.' : '';
+    var hr = $('homeReminder'); hr.innerHTML = '';
+    var rb = reminderBox(info, true); if (rb) hr.appendChild(rb);
+
+    var next = null;
+    PHASES.forEach(function (ph) { ph.steps.forEach(function (s) { if (!next && !state.steps[s.id]) next = { ph: ph, s: s }; }); });
+    $('nextStepText').textContent = next
+      ? 'Phase ' + next.ph.id + ' — ' + next.s.text
+      : 'You\'ve completed all 12 steps. Nice work. Keep your daily routine going.';
+  }
+
+  /* ===================== RENDER: STEPS ===================== */
+  function renderSteps() {
+    var host = $('roadmap'); host.innerHTML = '';
     PHASES.forEach(function (ph) {
-      var det = el('details', 'phase'); det.dataset.phase = String(ph.id);
       var done = ph.steps.filter(function (s) { return state.steps[s.id]; }).length;
-      if (firstRender ? ph.id === 1 : openIds.indexOf(String(ph.id)) !== -1) det.open = true;
-      var sum = el('summary');
-      sum.appendChild(el('span', 'phase-num', 'Phase ' + ph.id));
-      sum.appendChild(el('span', 'phase-title', ph.title));
-      sum.appendChild(el('span', 'phase-count', done + '/' + ph.steps.length));
-      det.appendChild(sum);
-      var body = el('div', 'body');
+      var head = el('div', 'phase-head');
+      head.appendChild(el('span', 'phase-num', 'Phase ' + ph.id));
+      head.appendChild(el('h2', null, ph.title));
+      head.appendChild(el('span', 'phase-count', done + '/' + ph.steps.length));
+      host.appendChild(head);
       ph.steps.forEach(function (s) {
         var row = el('div', 'step' + (state.steps[s.id] ? ' done' : ''));
         var cb = document.createElement('input');
         cb.type = 'checkbox'; cb.checked = !!state.steps[s.id]; cb.id = 'cb_' + s.id;
         cb.addEventListener('change', function () {
           state.steps[s.id] = cb.checked;
-          save(); renderRoadmap(); renderGauge();
+          save(); renderAll();
           if (cb.checked) toast('Step complete. Nice work.');
         });
         var wrap = el('div');
         var lab = document.createElement('label'); lab.htmlFor = cb.id;
-        var t = el('div', 't', s.text); t.style.fontWeight = '600';
-        lab.appendChild(t);
+        lab.appendChild(el('div', 't', s.text));
+        wrap.appendChild(lab);
+        wrap.appendChild(el('div', 'reflect', s.reflect));
         var why = el('div', 'why');
-        var b = el('b', null, 'Why this step matters: '); why.appendChild(b);
+        why.appendChild(el('b', null, 'Why this step matters: '));
         why.appendChild(document.createTextNode(s.why));
-        wrap.appendChild(lab); wrap.appendChild(why);
+        wrap.appendChild(why);
         row.appendChild(cb); row.appendChild(wrap);
-        body.appendChild(row);
+        host.appendChild(row);
       });
-      det.appendChild(body);
-      host.appendChild(det);
     });
   }
 
-  /* ===================== RECONNECT + INITIATIVE ===================== */
-  function currentInitiative() {
-    return state.initiatives.find(function (i) { return i.id === state.activeInitiative; }) || null;
+  /* ===================== RENDER: TODAY ===================== */
+  var suggShown = [];
+  function pickSuggestions() {
+    var planned = getDay(todayKey()).activities.map(function (a) { return a.text.toLowerCase(); });
+    var pool = [];
+    SUGGESTIONS.forEach(function (t, i) { if (planned.indexOf(t.toLowerCase()) < 0) pool.push(i); });
+    for (var i = pool.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var tmp = pool[i]; pool[i] = pool[j]; pool[j] = tmp; }
+    suggShown = pool.slice(0, 6);
   }
-  function pickRandomInitiative(excludeText) {
-    var pool = INITIATIVES.filter(function (t) { return t !== excludeText; });
-    return pool[Math.floor(Math.random() * pool.length)];
-  }
-  function startInitiative(text) {
-    var item = { id: uid(), ts: Date.now(), text: text, done: false, credited: false };
-    state.initiatives.push(item);
-    state.activeInitiative = item.id;
-    save();
-  }
-  function renderInitiative() {
-    var card = $('initiativeCard');
-    var cur = currentInitiative();
-    if (!cur) { card.style.display = 'none'; return; }
-    card.style.display = 'block';
-    $('initiativeText').textContent = cur.text;
-    $('initiativeDone').checked = cur.done;
-    var chips = $('initiativeChips'); chips.innerHTML = '';
-    INITIATIVES.forEach(function (t, idx) {
-      var c = el('button', 'chip' + (t === cur.text ? ' sel' : ''), 'Reset ' + (idx + 1));
-      c.type = 'button'; c.title = t;
-      c.addEventListener('click', function () {
-        if (cur.done) { startInitiative(t); } else { cur.text = t; save(); }
-        renderInitiative();
+  function renderToday() {
+    $('todayDate').textContent = new Date().toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
+    var info = dailyInfo(todayKey());
+    renderDailyBar($('todayPct'), $('todayBar'), info);
+    $('todayText').textContent = dailyText(info);
+    var tr = $('todayReminder'); tr.innerHTML = '';
+    var rb = reminderBox(info, false); if (rb) tr.appendChild(rb);
+
+    var list = $('planList'); list.innerHTML = '';
+    if (!info.acts.length) list.appendChild(el('p', 'muted', 'Nothing picked yet. Choose an idea below or add your own.'));
+    info.acts.forEach(function (a) {
+      var row = el('div', 'act' + (a.done ? ' done' : ''));
+      row.appendChild(el('span', 't', a.text));
+      var b = el('button', 'donebtn' + (a.done ? ' on' : ''), a.done ? '✓ Done' : 'Done');
+      b.type = 'button';
+      b.addEventListener('click', function () {
+        a.done = !a.done;
+        if (a.done && !a.credited) { a.credited = true; setBonus(state.bonus + 1); toast('Nice. Marked done (+1%).'); }
+        save(); renderAll();
       });
-      chips.appendChild(c);
+      var x = el('button', 'x', '×'); x.type = 'button'; x.setAttribute('aria-label', 'Remove activity');
+      x.addEventListener('click', function () {
+        var d = getDay(todayKey());
+        d.activities = d.activities.filter(function (o) { return o.id !== a.id; });
+        save(); renderAll();
+      });
+      row.appendChild(b); row.appendChild(x);
+      list.appendChild(row);
+    });
+
+    // suggestions (keep shown ones that are still unplanned, refill when needed)
+    var planned = info.acts.map(function (a) { return a.text.toLowerCase(); });
+    suggShown = suggShown.filter(function (i) { return planned.indexOf(SUGGESTIONS[i].toLowerCase()) < 0; });
+    if (suggShown.length < 6) pickSuggestions();
+    var sl = $('suggList'); sl.innerHTML = '';
+    suggShown.forEach(function (i) {
+      var b = el('button', 'sugg', SUGGESTIONS[i]); b.type = 'button';
+      b.addEventListener('click', function () { addActivity(SUGGESTIONS[i]); });
+      sl.appendChild(b);
     });
   }
-  function renderReconnectLog() {
+  $('ownForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (addActivity($('ownInput').value)) $('ownInput').value = '';
+  });
+  $('suggShuffle').addEventListener('click', function () { pickSuggestions(); renderToday(); });
+
+  /* ===================== RENDER: RECONNECT ===================== */
+  function renderReconnect() {
+    var tk = todayKey();
+    var n = state.reconnects.filter(function (r) { return dateKey(new Date(r.ts)) === tk; }).length;
+    $('reconnectToday').textContent = n ? 'Taps today: ' + n : 'No taps today.';
     var ul = $('reconnectLog'); ul.innerHTML = '';
-    var items = state.reconnects.slice(-5).reverse();
-    if (!items.length) { ul.appendChild(el('li', null, 'No check-ins logged. That\'s fine — this is just here if you need it.')); return; }
+    var items = state.reconnects.slice(-8).reverse();
+    if (!items.length) ul.appendChild(el('li', null, 'Nothing logged yet. That\'s fine — this page is here if you need it.'));
     items.forEach(function (r) {
       var txt = fmtDateTime(r.ts) + ' · ' + r.before + '% → ' + r.after + '%';
       if (r.note) txt += ' · ' + r.note;
       ul.appendChild(el('li', null, txt));
     });
+    $('afterTap').hidden = !justLogged;
+    if (justLogged) {
+      var host = $('afterTapIdeas'); host.innerHTML = '';
+      var planned = getDay(todayKey()).activities.map(function (a) { return a.text.toLowerCase(); });
+      var pool = SUGGESTIONS.filter(function (t) { return planned.indexOf(t.toLowerCase()) < 0; });
+      if (!host.dataset.picked || host.dataset.stale === '1') {
+        pool.sort(function () { return Math.random() - 0.5; });
+        host._pick = pool.slice(0, 3); host.dataset.picked = '1'; host.dataset.stale = '0';
+      }
+      (host._pick || []).filter(function (t) { return planned.indexOf(t.toLowerCase()) < 0; }).forEach(function (t) {
+        var b = el('button', 'sugg', t); b.type = 'button';
+        b.addEventListener('click', function () { addActivity(t); });
+        host.appendChild(b);
+      });
+      var last = state.reconnects[state.reconnects.length - 1];
+      $('undoBtn').hidden = !(last && last.delta !== undefined && Date.now() - last.ts < 120000);
+    }
   }
   $('reconnectBtn').addEventListener('click', function () {
+    var btn = $('reconnectBtn');
+    btn.disabled = true;
+    setTimeout(function () { btn.disabled = false; }, 2000);   // protects against accidental double taps
     var before = percent();
     var after = Math.max(0, before - 5);
+    var bonusBefore = state.bonus;
     setPercentTarget(after);
-    state.reconnects.push({ ts: Date.now(), note: $('reconnectNote').value.trim(), before: before, after: after });
-    $('reconnectNote').value = '';
-    startInitiative(pickRandomInitiative());
-    save();
-    renderGauge(); renderReconnectLog(); renderInitiative();
-    toast('Logged without judgment. Here\'s one small reset.');
-    $('initiativeCard').scrollIntoView({ behavior: 'smooth', block: 'center' });
-  });
-  $('initiativeShuffle').addEventListener('click', function () {
-    var cur = currentInitiative(); if (!cur) return;
-    var next = pickRandomInitiative(cur.text);
-    if (cur.done) startInitiative(next); else { cur.text = next; save(); }
-    renderInitiative();
-  });
-  $('initiativeDone').addEventListener('change', function (e) {
-    var cur = currentInitiative(); if (!cur) return;
-    cur.done = e.target.checked;
-    if (cur.done && !cur.credited) {
-      cur.credited = true;
-      setBonus(state.bonus + 2);
-      toast('Momentum rebuilt: +2%');
-    }
-    save(); renderGauge();
-  });
-
-  /* ===================== ACTIVITIES + TIMER ===================== */
-  var activityIndex = 0;
-  function renderActivity() {
-    var a = ACTIVITIES[activityIndex];
-    var box = $('activityBox'); box.innerHTML = '';
-    box.appendChild(el('b', null, a.t));
-    box.appendChild(el('span', null, a.d));
-    var chips = $('activityChips'); chips.innerHTML = '';
-    ACTIVITIES.forEach(function (x, i) {
-      var c = el('button', 'chip' + (i === activityIndex ? ' sel' : ''), x.t);
-      c.type = 'button';
-      c.addEventListener('click', function () { activityIndex = i; renderActivity(); });
-      chips.appendChild(c);
+    state.reconnects.push({
+      id: uid(), ts: Date.now(), note: $('reconnectNote').value.trim(),
+      before: before, after: after, delta: state.bonus - bonusBefore
     });
-  }
-  $('activityRandom').addEventListener('click', function () {
-    var n; do { n = Math.floor(Math.random() * ACTIVITIES.length); } while (n === activityIndex && ACTIVITIES.length > 1);
-    activityIndex = n; renderActivity();
+    $('reconnectNote').value = '';
+    justLogged = true;
+    $('afterTapIdeas').dataset.stale = '1';
+    save(); renderAll();
+    toast('Logged without judgment.');
+    $('afterTap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+  $('undoBtn').addEventListener('click', function () {
+    var last = state.reconnects[state.reconnects.length - 1];
+    if (!last || last.delta === undefined) return;
+    setBonus(state.bonus - last.delta);
+    state.reconnects.pop();
+    justLogged = false;
+    save(); renderAll();
+    toast('Undone.');
   });
 
-  var TIMER_TOTAL = 300, timerRemaining = TIMER_TOTAL, timerEnd = 0, timerIv = null;
-  function showTimer() {
-    var m = Math.floor(timerRemaining / 60), s = timerRemaining % 60;
-    $('timerDisplay').textContent = m + ':' + String(s).padStart(2, '0');
-  }
-  function timerTick() {
-    timerRemaining = Math.max(0, Math.ceil((timerEnd - Date.now()) / 1000));
-    showTimer();
-    if (timerRemaining <= 0) {
-      clearInterval(timerIv); timerIv = null;
-      toast('Time\'s up. Take a breath — how do you feel?');
-      try { if (navigator.vibrate) navigator.vibrate([200, 100, 200]); } catch (e) {}
-      timerRemaining = TIMER_TOTAL; showTimer();
-    }
-  }
-  $('timerStart').addEventListener('click', function () {
-    if (timerIv) return;
-    timerEnd = Date.now() + timerRemaining * 1000;
-    timerIv = setInterval(timerTick, 250);
-  });
-  $('timerPause').addEventListener('click', function () {
-    if (!timerIv) return;
-    timerRemaining = Math.max(0, Math.ceil((timerEnd - Date.now()) / 1000));
-    clearInterval(timerIv); timerIv = null; showTimer();
-  });
-  $('timerReset').addEventListener('click', function () {
-    clearInterval(timerIv); timerIv = null; timerRemaining = TIMER_TOTAL; showTimer();
-  });
-
-  /* ===================== DAILY CHECK-IN ===================== */
+  /* ===================== RENDER: REFLECT ===================== */
   var CHECKIN_LABELS = {
     steady: 'Kept my boundaries', mixed: 'Mixed day', slipped: 'Slipped, starting again', resting: 'Rested and got through it'
   };
-  function renderCheckin() {
+  function dayOfYear() {
+    var n = new Date(); return Math.floor((n - new Date(n.getFullYear(), 0, 0)) / 86400000);
+  }
+  function renderReflect() {
     var key = todayKey();
     $('checkinDate').textContent = 'Today: ' + new Date().toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
+    $('dailyQuestion').textContent = QUESTIONS[dayOfYear() % QUESTIONS.length];
     var cur = state.checkins[key];
-    $('checkinSelect').value = cur ? cur.mood : '';
-    $('checkinNote').value = cur ? cur.note : '';
+    if (document.activeElement !== $('checkinNote')) $('checkinNote').value = cur ? (cur.note || '') : '';
+    if (document.activeElement !== $('checkinSelect')) $('checkinSelect').value = cur ? cur.mood : '';
     var ul = $('checkinLog'); ul.innerHTML = '';
     var keys = Object.keys(state.checkins).sort().reverse().slice(0, 7);
-    if (!keys.length) { ul.appendChild(el('li', null, 'No check-ins yet.')); return; }
+    if (!keys.length) ul.appendChild(el('li', null, 'No check-ins yet.'));
     keys.forEach(function (k) {
       var c = state.checkins[k];
-      var txt = k + ' · ' + (CHECKIN_LABELS[c.mood] || 'Checked in') + (c.note ? ' — ' + c.note : '');
-      ul.appendChild(el('li', null, txt));
+      ul.appendChild(el('li', null, k + ' · ' + (CHECKIN_LABELS[c.mood] || 'Checked in') + (c.note ? ' — ' + c.note : '')));
     });
   }
   $('checkinSave').addEventListener('click', function () {
     var mood = $('checkinSelect').value;
     if (!mood) { toast('Pick how today went first.'); return; }
     state.checkins[todayKey()] = { mood: mood, note: $('checkinNote').value.trim(), savedAt: Date.now() };
-    save(); renderCheckin();
+    save(); renderAll();
     toast('Saved. Thank you for being honest with yourself.');
   });
 
-  /* ===================== TODOS ===================== */
+  /* ===================== RENDER: WINS ===================== */
   var todoFilter = 'all';
-  function renderTodos() {
+  function renderWins() {
     var host = $('todoList'); host.innerHTML = '';
     var list = state.todos.filter(function (t) {
       return todoFilter === 'all' || (todoFilter === 'done' ? t.done : !t.done);
@@ -729,20 +1014,41 @@
       cb.addEventListener('change', function () {
         t.done = cb.checked;
         if (t.done && !t.credited) { t.credited = true; setBonus(state.bonus + 1); toast('Small win: +1%'); }
-        save(); renderTodos(); renderGauge();
+        save(); renderAll();
       });
-      var txt = el('span', 't', t.text);
       var x = el('button', 'x', '×'); x.type = 'button'; x.setAttribute('aria-label', 'Delete task');
       x.addEventListener('click', function () {
         state.todos = state.todos.filter(function (o) { return o.id !== t.id; });
-        save(); renderTodos();
+        save(); renderAll();
       });
-      row.appendChild(cb); row.appendChild(txt); row.appendChild(x);
+      row.appendChild(cb); row.appendChild(el('span', 't', t.text)); row.appendChild(x);
       host.appendChild(row);
     });
-    document.querySelectorAll('#todoFilter button').forEach(function (b) {
-      b.classList.toggle('on', b.dataset.f === todoFilter);
+    document.querySelectorAll('#todoFilter button').forEach(function (b) { b.classList.toggle('on', b.dataset.f === todoFilter); });
+
+    $('winsCount').textContent = state.wins.length
+      ? 'You have saved ' + plural(state.wins.length, 'win', 'wins') + ' so far. Look how much you\'ve done.'
+      : 'When you finish a task, tap "Save completed to my wins" and it will be kept here.';
+    var wl = $('winsList'); wl.innerHTML = '';
+    state.wins.slice(-20).reverse().forEach(function (w) {
+      wl.appendChild(el('li', null, '✓ ' + w.text + ' · ' + new Date(w.ts).toLocaleDateString([], { month: 'short', day: 'numeric' })));
     });
+
+    // daily routine history (last 7 days)
+    var hist = $('dayHistory'); hist.innerHTML = '';
+    var full = 0;
+    for (var i = 0; i < 7; i++) {
+      var d = new Date(); d.setDate(d.getDate() - i);
+      var k = dateKey(d), info = dailyInfo(k);
+      if (info.pct >= 100) full++;
+      var row = el('div', 'daybar');
+      row.appendChild(el('span', 'd', i === 0 ? 'Today' : d.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })));
+      var outer = el('div', 'bar-outer'); var inner = el('div', 'bar-inner' + (info.pct >= 100 ? ' full' : '')); inner.style.width = info.pct + '%';
+      outer.appendChild(inner); row.appendChild(outer);
+      row.appendChild(el('span', 'p', info.pct + '%'));
+      hist.appendChild(row);
+    }
+    $('streakText').textContent = full + ' of the last 7 days reached 100%.';
   }
   $('todoForm').addEventListener('submit', function (e) {
     e.preventDefault();
@@ -750,38 +1056,40 @@
     if (!v) return;
     state.todos.push({ id: uid(), text: v, done: false, credited: false });
     $('todoInput').value = '';
-    save(); renderTodos();
+    save(); renderAll();
   });
   $('todoFilter').addEventListener('click', function (e) {
     var b = e.target.closest('button'); if (!b) return;
-    todoFilter = b.dataset.f; renderTodos();
+    todoFilter = b.dataset.f; renderAll();
   });
   $('todoClear').addEventListener('click', function () {
-    var n = state.todos.filter(function (t) { return t.done; }).length;
-    if (!n) { toast('No completed tasks to clear.'); return; }
+    var done = state.todos.filter(function (t) { return t.done; });
+    if (!done.length) { toast('No completed tasks yet.'); return; }
+    done.forEach(function (t) { state.wins.push({ id: t.id, text: t.text, ts: Date.now() }); });
     state.todos = state.todos.filter(function (t) { return !t.done; });
-    save(); renderTodos(); toast('Cleared ' + n + ' completed task' + (n > 1 ? 's' : '') + '.');
+    save(); renderAll();
+    toast('Saved ' + plural(done.length, 'win', 'wins') + ' to your list.');
   });
 
   /* ===================== BACKUP / RESTORE ===================== */
   function makeBackup() {
-    var payload = { app: 'moving-on', version: 1, exportedAt: new Date().toISOString(), data: state };
-    $('backupBox').value = JSON.stringify(payload);
+    $('backupBox').value = JSON.stringify({ app: 'moving-on', version: 2, exportedAt: new Date().toISOString(), data: state });
   }
-  function copyText(text) {
+  function copyBackup() {
+    var box = $('backupBox');
     function fallback() {
-      var box = $('backupBox'); box.focus(); box.select(); box.setSelectionRange(0, box.value.length);
+      box.focus(); box.select(); box.setSelectionRange(0, box.value.length);
       var ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
       toast(ok ? 'Backup copied ✓' : 'Press and hold the text to copy it.');
     }
     if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(text).then(function () { toast('Backup copied ✓'); }, fallback);
+      navigator.clipboard.writeText(box.value).then(function () { toast('Backup copied ✓'); }, fallback);
     } else { fallback(); }
   }
   $('backupMake').addEventListener('click', function () { makeBackup(); toast('Backup created. Tap Copy.'); });
   $('backupCopy').addEventListener('click', function () {
     if (!$('backupBox').value.trim()) makeBackup();
-    copyText($('backupBox').value);
+    copyBackup();
   });
   $('backupRestore').addEventListener('click', function () {
     var raw = $('backupBox').value.trim();
@@ -791,17 +1099,44 @@
       var data = parsed && parsed.app === 'moving-on' ? parsed.data : null;
       if (!data || typeof data !== 'object' || typeof data.steps !== 'object') throw new Error('bad');
       if (!window.confirm('Restore this backup? It will replace the progress currently on this phone.')) return;
-      state = Object.assign(defaultState(), data);
-      save();
-      renderAll();
+      var s = defaultState();
+      ['startedAt', 'steps', 'bonus', 'reconnects', 'days', 'todos', 'wins', 'checkins'].forEach(function (k) {
+        if (data[k] !== undefined) s[k] = data[k];
+      });
+      state = s;
+      save(); renderAll();
       toast('Backup restored ✓');
     } catch (e) { toast('That doesn\'t look like a valid backup.'); }
   });
 
+  /* ===================== REMINDER POP-UP ===================== */
+  var modalShownFor = '';
+  function maybeShowModal() {
+    var hour = new Date().getHours();
+    var key = todayKey();
+    if (modalShownFor === key || hour < TRACKER_CONFIG.EVENING_HOUR) return;
+    var info = dailyInfo(key);
+    var msg = '';
+    if (info.pending.length) {
+      msg = 'You still have ' + plural(info.pending.length, 'activity', 'activities') + ' not marked done today. If you did ' +
+            (info.pending.length === 1 ? 'it' : 'them') + ', tap Done. Anything not marked done means today won\'t reach 100%.';
+    } else if (info.acts.length && !info.checked && hour >= TRACKER_CONFIG.CHECKIN_HOUR) {
+      msg = 'Your activities are done. Finish today with your end-of-day check-in to reach 100%.';
+    }
+    if (!msg) return;
+    modalShownFor = key;
+    $('modalText').textContent = msg;
+    $('modalGo').setAttribute('href', info.pending.length ? '#today' : '#reflect');
+    $('modal').hidden = false;
+  }
+  $('modalClose').addEventListener('click', function () { $('modal').hidden = true; });
+  $('modalGo').addEventListener('click', function () { $('modal').hidden = true; });
+
   /* ===================== RENDER ALL ===================== */
   function renderAll() {
-    renderGauge(); renderRoadmap(); renderReconnectLog(); renderInitiative();
-    renderActivity(); showTimer(); renderCheckin(); renderTodos();
+    renderHome(); renderSteps(); renderToday(); renderReconnect(); renderReflect(); renderWins();
+    var info = dailyInfo(todayKey());
+    $('navDot').hidden = !info.pending.length;
   }
 
   /* ===================== GATE ===================== */
@@ -812,7 +1147,8 @@
   function showApp() {
     $('gate').style.display = 'none';
     $('app').style.display = 'block';
-    renderAll();
+    showPage();
+    maybeShowModal();
   }
   $('gateForm').addEventListener('submit', function (e) {
     e.preventDefault();
@@ -826,9 +1162,13 @@
     }
   });
 
+  // When the app comes back to the screen (new day, evening), refresh and remind
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible' && isUnlocked()) { renderAll(); maybeShowModal(); }
+  });
+
   document.title = TRACKER_CONFIG.BRAND_NAME + ' — Tracker';
   $('gateBrand').textContent = TRACKER_CONFIG.BRAND_NAME;
-  $('appBrand').textContent = TRACKER_CONFIG.BRAND_NAME;
   if (isUnlocked()) showApp();
 
   /* ===================== SERVICE WORKER ===================== */

@@ -4,7 +4,7 @@ A static, offline-capable PWA (no build step) for GitHub Pages.
 
 ## GitHub Upload Checklist
 
-Put these 7 files in the **root** of a single repository:
+Put these 6 files in the **root** of a single repository:
 
 - [ ] `index.html` — public landing & sales page
 - [ ] `tracker.html` — the buyer tracker (home screen app)
@@ -12,15 +12,13 @@ Put these 7 files in the **root** of a single repository:
 - [ ] `sw.js` — service worker (offline support)
 - [ ] `icon-192.png` — app icon
 - [ ] `icon-512.png` — app icon
-- [ ] `gcash-qr.png` — **replace with your own GCash/Maya QR screenshot** (keep the filename)
 
 ### Before you upload, edit
-1. `index.html` → `CONFIG` block at the top: brand name, creator name, price, GCash/Maya name & number, receipt link.
+1. `index.html` → `CONFIG` block at the top: brand name, how you introduce yourself, price, contact handle and link.
 2. `tracker.html` → `TRACKER_CONFIG` block at the top: `ACCESS_CODE` (default `HEAL2026`) or set `REQUIRE_CODE: false` to disable the gate.
-3. Replace `gcash-qr.png` with your real QR image.
 
 ### Enable GitHub Pages
-1. Create a new repository and upload the 7 files (Add file → Upload files → Commit).
+1. Create a new repository and upload the 6 files (Add file → Upload files → Commit).
 2. Go to **Settings → Pages**.
 3. Under **Build and deployment**, set **Source** to *Deploy from a branch*.
 4. Choose branch **main** and folder **/ (root)**, then **Save**.
