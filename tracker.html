@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Moving On — Tracker</title>
+<meta name="theme-color" content="#FAF7F2">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Moving On">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- =====================================================================
+     CONFIGURATION — EDIT THESE VALUES
+     ===================================================================== -->
+<script>
+  const TRACKER_CONFIG = {
+    BRAND_NAME: "Moving On",
+
+    // BUYER UNLOCK CODE
+    //  - To CHANGE the code: edit ACCESS_CODE below (case-insensitive when entered).
+    //  - To DISABLE the gate entirely: set REQUIRE_CODE to false.
+    //  - IMPORTANT: this is a light gate for a static site. Anyone who views the page source can
+    //    read the code, so treat it as a "friendly lock", not bank-level security.
+    //  - Changing the code later will NOT lock out people who already unlocked on their phone.
+    REQUIRE_CODE: true,
+    ACCESS_CODE: "HEAL2026",
+
+    // Length of the transition journey shown in the app (days)
+    JOURNEY_MIN_DAYS: 30,
+    JOURNEY_MAX_DAYS: 90
+  };
+</script>
+
+<style>
+  :root{
+    --cream:#FAF7F2; --card:#FFFFFF; --ink:#2B2623; --line:#EAE3D9;
+    --clay:#C47457; --clay-dark:#A85D42; --sage:#7D8F7B; --muted:#6F6761;
+    --shadow:0 1px 2px rgba(43,38,35,.05),0 6px 18px rgba(43,38,35,.06);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    background:var(--cream);color:var(--ink);
+    font-family:"Plus Jakarta Sans",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    line-height:1.55;font-size:16px;
+    padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  }
+  .wrap{max-width:560px;margin:0 auto;padding:18px 16px 60px}
+  h1,h2,h3{font-family:Lora,Georgia,serif;line-height:1.25;font-weight:600}
+  h1{font-size:1.5rem}
+  h2{font-size:1.2rem;margin-bottom:6px}
+  h3{font-size:1.02rem;margin-bottom:4px}
+  p{margin-bottom:10px}
+  .muted{color:var(--muted);font-size:.9rem}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:var(--shadow);margin-bottom:14px}
+  .eyebrow{font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--sage);font-weight:700;margin-bottom:4px}
+  .topbar{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .topbar img{width:42px;height:42px;border-radius:11px;border:1px solid var(--line)}
+  button,input,select,textarea{font:inherit;color:inherit}
+  .btn{
+    display:block;width:100%;text-align:center;cursor:pointer;
+    background:var(--clay);color:#fff;border:0;border-radius:14px;padding:14px 16px;
+    font-weight:600;min-height:48px
+  }
+  .btn:active{background:var(--clay-dark)}
+  .btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+  .btn.sage{background:var(--sage)}
+  .btn.small{display:inline-block;width:auto;padding:10px 14px;min-height:42px;border-radius:12px;font-size:.92rem}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  .row > .btn{flex:1 1 0;min-width:90px}
+  input[type=text],input[type=password],textarea,select{
+    width:100%;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:12px;font-size:16px
+  }
+  textarea{min-height:88px;resize:vertical}
+  input:focus,textarea:focus,select:focus{outline:2px solid var(--clay);outline-offset:1px;border-color:var(--clay)}
+  .field{margin-bottom:10px}
+  label.lbl{display:block;font-weight:600;font-size:.9rem;margin-bottom:6px}
+
+  /* Gate */
+  #gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+  #gate .card{max-width:420px;width:100%;text-align:center}
+  #gate img{width:84px;height:84px;border-radius:20px;border:1px solid var(--line);margin-bottom:12px}
+  .err{color:#A33A2A;font-size:.9rem;min-height:1.3em;margin-top:8px}
+  #app{display:none}
+
+  /* Gauge */
+  .gauge-wrap{display:flex;flex-direction:column;align-items:center;text-align:center}
+  .gauge{position:relative;width:200px;height:200px;margin:6px 0 10px}
+  .gauge svg{width:100%;height:100%;transform:rotate(-90deg)}
+  .gauge .track{stroke:#EFE9DF}
+  .gauge .bar{stroke:var(--clay);transition:stroke-dashoffset .8s cubic-bezier(.22,.8,.3,1),stroke .4s}
+  .gauge .num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .gauge .num b{font-family:Lora,serif;font-size:2.7rem;line-height:1}
+  .gauge .num span{font-size:.78rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-top:4px}
+  .status{font-family:Lora,serif;font-style:italic;font-size:1.05rem;color:#4a423d;min-height:3em}
+  .daychip{display:inline-block;background:#EEF1EC;color:#55664F;border-radius:999px;padding:4px 12px;font-size:.8rem;font-weight:600;margin-bottom:8px}
+  .journeynote{background:var(--cream);border:1px dashed var(--line);border-radius:12px;padding:10px 12px;margin-top:10px;font-size:.88rem;color:var(--muted)}
+
+  /* Honesty card */
+  .honest{background:#F6EEE9;border-color:#E8D3C8}
+  .honest p.big{font-family:Lora,serif;font-size:1.08rem;color:#3b322d}
+
+  /* Roadmap */
+  .phase{border:1px solid var(--line);border-radius:14px;margin-bottom:10px;background:#fff;overflow:hidden}
+  .phase > summary{cursor:pointer;list-style:none;padding:13px 14px;display:flex;align-items:center;gap:10px}
+  .phase > summary::-webkit-details-marker{display:none}
+  .phase-num{background:var(--clay);color:#fff;border-radius:10px;padding:3px 9px;font-size:.74rem;font-weight:700;white-space:nowrap}
+  .phase-title{flex:1;font-family:Lora,serif;font-weight:600}
+  .phase-count{font-size:.8rem;color:var(--muted)}
+  .phase .body{padding:0 14px 6px}
+  .step{display:flex;gap:12px;padding:12px 0;border-top:1px dashed var(--line)}
+  .step input[type=checkbox]{flex:0 0 26px;width:26px;height:26px;accent-color:var(--clay);margin-top:2px}
+  .step.done .t{text-decoration:line-through;color:var(--muted)}
+  .step .why{font-size:.88rem;color:var(--muted);margin-top:4px}
+  .step .why b{color:var(--sage)}
+
+  /* Reconnect + initiative */
+  .initiative{border:1.5px solid var(--sage);background:#F3F6F2;border-radius:14px;padding:14px;margin-top:12px}
+  .initiative .action{font-weight:600;margin:6px 0 10px}
+  .chk{display:flex;gap:10px;align-items:flex-start;padding:6px 0}
+  .chk input{width:24px;height:24px;accent-color:var(--sage);flex:0 0 24px;margin-top:2px}
+  .log{list-style:none;margin-top:8px}
+  .log li{font-size:.86rem;color:var(--muted);padding:8px 0;border-top:1px dashed var(--line)}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+  .chip{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:8px 12px;font-size:.85rem;cursor:pointer}
+  .chip.sel{border-color:var(--clay);background:#F9EDE7;color:var(--clay-dark);font-weight:600}
+
+  /* Activities + timer */
+  .activity{background:var(--cream);border:1px solid var(--line);border-radius:14px;padding:14px;margin:10px 0}
+  .activity b{display:block;font-family:Lora,serif;font-size:1.05rem;margin-bottom:4px}
+  .timer{font-family:Lora,serif;font-size:2.6rem;text-align:center;margin:6px 0;letter-spacing:.04em}
+
+  /* Todos */
+  .todo{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px dashed var(--line)}
+  .todo input[type=checkbox]{width:24px;height:24px;accent-color:var(--clay);flex:0 0 24px}
+  .todo .t{flex:1;word-break:break-word}
+  .todo.done .t{text-decoration:line-through;color:var(--muted)}
+  .todo .x{background:none;border:0;color:var(--muted);font-size:1.3rem;cursor:pointer;padding:4px 8px}
+  .seg{display:flex;gap:6px;margin:10px 0 4px}
+  .seg button{flex:1;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:8px;font-size:.85rem;cursor:pointer}
+  .seg button.on{border-color:var(--clay);background:#F9EDE7;color:var(--clay-dark);font-weight:600}
+
+  details.plain{border:1px solid var(--line);border-radius:12px;padding:0 14px;margin-bottom:8px;background:#fff}
+  details.plain summary{cursor:pointer;font-weight:600;padding:12px 0;list-style:none}
+  details.plain summary::-webkit-details-marker{display:none}
+  details.plain p, details.plain ol{padding-bottom:10px;font-size:.93rem}
+  details.plain ol{padding-left:20px}
+
+  .toast{
+    position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translate(-50%,30px);
+    background:var(--ink);color:#fff;padding:12px 18px;border-radius:12px;font-size:.92rem;
+    opacity:0;pointer-events:none;transition:.25s;z-index:50;max-width:90%;text-align:center
+  }
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+  @media (prefers-reduced-motion:reduce){.gauge .bar,.toast{transition:none}}
+</style>
+</head>
+<body>
+
+<!-- ======================= ACCESS GATE ======================= -->
+<div id="gate">
+  <div class="card">
+    <img src="./icon-192.png" alt="">
+    <h1 id="gateBrand">Moving On</h1>
+    <p class="muted" style="margin:8px 0 14px">Enter the unlock code you received with your access link.</p>
+    <form id="gateForm" autocomplete="off">
+      <input type="password" id="codeInput" placeholder="Unlock code" autocapitalize="characters" autocorrect="off" spellcheck="false" aria-label="Unlock code">
+      <div class="err" id="gateErr" role="alert"></div>
+      <button class="btn" type="submit" style="margin-top:6px">Unlock</button>
+    </form>
+  </div>
+</div>
+
+<!-- ======================= APP ======================= -->
+<div id="app">
+<div class="wrap">
+
+  <div class="topbar">
+    <img src="./icon-192.png" alt="">
+    <div>
+      <p class="eyebrow" style="margin:0">Your transition companion</p>
+      <h1 id="appBrand">Moving On</h1>
+    </div>
+  </div>
+
+  <!-- Gauge -->
+  <div class="card gauge-wrap">
+    <span class="daychip" id="dayChip">Day 1</span>
+    <div class="gauge" role="img" aria-label="Moving-on progress">
+      <svg viewBox="0 0 200 200">
+        <circle class="track" cx="100" cy="100" r="82" fill="none" stroke-width="16"></circle>
+        <circle class="bar" id="gaugeBar" cx="100" cy="100" r="82" fill="none" stroke-width="16" stroke-linecap="round"
+                stroke-dasharray="515.22" stroke-dashoffset="515.22"></circle>
+      </svg>
+      <div class="num"><b id="pctNum">0%</b><span>moving on</span></div>
+    </div>
+    <p class="status" id="statusMsg"></p>
+    <div class="journeynote" id="journeyNote"></div>
+  </div>
+
+  <!-- Honesty reminder -->
+  <div class="card honest">
+    <p class="eyebrow" style="color:var(--clay)">A gentle reminder</p>
+    <p class="big"><strong>Be honest with yourself at the end of the day.</strong> This app only monitors your progress—your decisions and your pace are always yours.</p>
+  </div>
+
+  <!-- Roadmap -->
+  <div class="card">
+    <p class="eyebrow">Your roadmap</p>
+    <h2>4 phases, 12 steps</h2>
+    <p class="muted">Tap a phase to open it. Check a step when you've done it — go at your own pace.</p>
+    <div id="roadmap"></div>
+  </div>
+
+  <!-- Reconnect log -->
+  <div class="card" id="reconnectCard">
+    <p class="eyebrow">Setbacks happen</p>
+    <h2>Reconnect check-in</h2>
+    <p class="muted">If you reached out, checked their profile, or looked back — log it here without shame. Your percentage dips a little (−5%), then you take one small reset action to get your footing back.</p>
+    <div class="field">
+      <label class="lbl" for="reconnectNote">Optional note (what happened or what you felt)</label>
+      <textarea id="reconnectNote" placeholder="Only you see this."></textarea>
+    </div>
+    <button class="btn" id="reconnectBtn" type="button">I attempted to reconnect / checked in</button>
+
+    <div class="initiative" id="initiativeCard" style="display:none">
+      <p class="eyebrow" style="color:var(--sage)">Take a New Initiative</p>
+      <h3>One small reset to rebuild momentum</h3>
+      <p class="action" id="initiativeText"></p>
+      <label class="chk"><input type="checkbox" id="initiativeDone"><span>I did this reset (+2% momentum)</span></label>
+      <div class="row" style="margin-top:8px">
+        <button class="btn sage small" id="initiativeShuffle" type="button">Show me a different one</button>
+      </div>
+      <p class="muted" style="margin:12px 0 4px">Or pick your own:</p>
+      <div class="chips" id="initiativeChips"></div>
+    </div>
+
+    <h3 style="margin-top:16px">Recent check-ins</h3>
+    <ul class="log" id="reconnectLog"></ul>
+  </div>
+
+  <!-- Focus shift -->
+  <div class="card">
+    <p class="eyebrow">When overthinking hits</p>
+    <h2>Need a Focus Shift? Pick a 5-Minute Reset</h2>
+    <p class="muted">Low pressure. Pick one, start the timer, and let it be a small break.</p>
+    <div class="activity" id="activityBox"></div>
+    <div class="row">
+      <button class="btn ghost small" id="activityRandom" type="button">Surprise me</button>
+    </div>
+    <div class="chips" id="activityChips"></div>
+    <div class="timer" id="timerDisplay">5:00</div>
+    <div class="row">
+      <button class="btn small" id="timerStart" type="button">Start</button>
+      <button class="btn ghost small" id="timerPause" type="button">Pause</button>
+      <button class="btn ghost small" id="timerReset" type="button">Reset</button>
+    </div>
+  </div>
+
+  <!-- Daily check-in -->
+  <div class="card">
+    <p class="eyebrow">End of day</p>
+    <h2>Honesty check-in</h2>
+    <p class="muted" id="checkinDate"></p>
+    <div class="field">
+      <label class="lbl" for="checkinSelect">How did today go with your own boundaries?</label>
+      <select id="checkinSelect">
+        <option value="">Choose one…</option>
+        <option value="steady">I kept my boundaries today</option>
+        <option value="mixed">A mixed day — some wins, some wobbles</option>
+        <option value="slipped">I slipped today, and I'm okay with starting again</option>
+        <option value="resting">I mostly rested and got through it</option>
+      </select>
+    </div>
+    <div class="field">
+      <label class="lbl" for="checkinNote">Private reflection (optional)</label>
+      <textarea id="checkinNote" placeholder="What's one honest thing about today?"></textarea>
+    </div>
+    <button class="btn" id="checkinSave" type="button">Save today's check-in</button>
+    <h3 style="margin-top:16px">Recent days</h3>
+    <ul class="log" id="checkinLog"></ul>
+  </div>
+
+  <!-- Todos -->
+  <div class="card">
+    <p class="eyebrow">Small wins</p>
+    <h2>My moving-on to-do list</h2>
+    <p class="muted">Each task you finish gives your progress a small boost (+1%, once per task).</p>
+    <form id="todoForm" class="row" style="flex-wrap:nowrap;margin-top:8px">
+      <input type="text" id="todoInput" placeholder="e.g. Go for a 10-minute walk" maxlength="120" aria-label="New task">
+      <button class="btn small" type="submit" style="flex:0 0 auto">Add</button>
+    </form>
+    <div class="seg" id="todoFilter">
+      <button type="button" data-f="all" class="on">All</button>
+      <button type="button" data-f="active">Active</button>
+      <button type="button" data-f="done">Done</button>
+    </div>
+    <div id="todoList"></div>
+    <button class="btn ghost small" id="todoClear" type="button" style="margin-top:10px">Clear completed</button>
+  </div>
+
+  <!-- Backup -->
+  <div class="card">
+    <p class="eyebrow">Keep it safe</p>
+    <h2>Copy / Restore Backup</h2>
+    <p class="muted">Your progress lives only on this phone. Copy your backup and save it somewhere safe (a note to yourself works), or paste a backup here to restore on a new phone.</p>
+    <textarea id="backupBox" placeholder="Your backup will appear here, or paste a backup to restore." style="min-height:110px;font-size:13px"></textarea>
+    <div class="row" style="margin-top:8px">
+      <button class="btn small" id="backupMake" type="button">Create backup</button>
+      <button class="btn ghost small" id="backupCopy" type="button">Copy</button>
+      <button class="btn ghost small" id="backupRestore" type="button">Restore</button>
+    </div>
+  </div>
+
+  <!-- Home screen guide -->
+  <div class="card">
+    <p class="eyebrow">Make it an app</p>
+    <h2>Add to Home Screen</h2>
+    <details class="plain">
+      <summary>iPhone (Safari)</summary>
+      <ol>
+        <li>Open this page in <strong>Safari</strong>.</li>
+        <li>Tap the <strong>Share</strong> button.</li>
+        <li>Scroll and tap <strong>Add to Home Screen</strong>, then <strong>Add</strong>.</li>
+      </ol>
+    </details>
+    <details class="plain">
+      <summary>Android (Chrome)</summary>
+      <ol>
+        <li>Open this page in <strong>Chrome</strong>.</li>
+        <li>Tap the <strong>Menu ⋮</strong> at the top right.</li>
+        <li>Choose <strong>Install app</strong> or <strong>Add to Home screen</strong>, then confirm.</li>
+      </ol>
+    </details>
+    <p class="muted"><strong>Tip:</strong> If you opened this link inside another app's built-in browser, tap its menu and choose "Open in Safari" or "Open in Chrome" first. Home Screen install only works from the real browser.</p>
+  </div>
+
+  <p class="muted" style="text-align:center;margin-top:20px">This is a 30–90 day companion. The goal is to build momentum and graduate — a life that doesn't need this app. Be kind to yourself.</p>
+
+</div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ===================== DATA ===================== */
+  var PHASES = [
+    { id: 1, title: 'Radical Acceptance', steps: [
+      { id: 's1',  text: 'Write down the plain facts of what ended (no "if only" or "what if").',
+        why: 'Plain facts stop your mind from bargaining with reality. You can\'t move away from something you\'re still negotiating with.' },
+      { id: 's2',  text: 'Name three feelings you have right now, out loud or on paper.',
+        why: 'Naming a feeling lowers its intensity and turns it into something you can work with instead of something that runs you.' },
+      { id: 's3',  text: 'Say once, out loud: "This chapter is over, and I will be okay."',
+        why: 'Hearing your own voice say it starts turning a painful idea into an accepted fact, which is where healing begins.' }
+    ]},
+    { id: 2, title: 'Processing Without Spiraling', steps: [
+      { id: 's4',  text: 'Set a daily 15-minute "feelings window" and keep to it.',
+        why: 'Giving grief a time and place keeps it from leaking into every hour of your day and exhausting you.' },
+      { id: 's5',  text: 'Write an unsent letter to them — and keep it unsent.',
+        why: 'You get to say everything without consequences, so the words stop circling in your head.' },
+      { id: 's6',  text: 'Tell one trusted person how you really are doing.',
+        why: 'Carrying it alone makes it heavier. One honest conversation can lighten more than a week of coping in silence.' }
+    ]},
+    { id: 3, title: 'Boundaries & Detox', steps: [
+      { id: 's7',  text: 'Mute, archive, or hide their messages, updates, and notifications.',
+        why: 'Every reminder restarts the urge to check. Less exposure means fewer urges to fight each day.' },
+      { id: 's8',  text: 'Box up physical reminders (photos, gifts) for 30 days.',
+        why: 'Out of sight gives your nervous system room to settle. Nothing is thrown away — you\'re just creating space.' },
+      { id: 's9',  text: 'Write your own "if I feel the urge to reach out" plan.',
+        why: 'Decisions made while calm beat decisions made at 11 p.m. A plan you wrote yourself is easier to follow.' }
+    ]},
+    { id: 4, title: 'Rebuilding Your Identity', steps: [
+      { id: 's10', text: 'List 5 things that are yours alone: values, hobbies, strengths.',
+        why: 'Relationships can blur who you are. Reconnecting with your own interests rebuilds a steady sense of self.' },
+      { id: 's11', text: 'Schedule one thing just for you this week, with a day and time.',
+        why: 'Moving on is built from actions, not intentions. A booked plan turns "someday" into "Saturday."' },
+      { id: 's12', text: 'Write a short note from you, 90 days from now.',
+        why: 'Picturing an ordinary good day ahead gives your mind something to walk toward, not only away from.' }
+    ]}
+  ];
+  var TOTAL_STEPS = 12;
+
+  var INITIATIVES = [
+    'Mute or archive their name everywhere for the next 24 hours.',
+    'Do a 5-minute no-send brain dump: write everything you want to say, then close the page without sending.',
+    'Put your phone in another room for 30 minutes.',
+    'Text a friend or family member instead and ask for a short call or walk.',
+    'Take a 10-minute walk outside without headphones or scrolling.',
+    'Delete the draft message you were writing, then drink a full glass of water.',
+    'Re-read your "if I feel the urge" plan (Phase 3) and add one more line to it.',
+    'Tidy one small space — a desk, a drawer, a corner of your room — for 10 minutes.'
+  ];
+
+  var ACTIVITIES = [
+    { t: '2-Minute Room Reset', d: 'Set a timer and put away or straighten as many things as you can in one small area.' },
+    { t: 'One Song, Full Body', d: 'Put on one song you love and move, stretch, or dance badly until it ends.' },
+    { t: 'Three Things I Don\'t Miss', d: 'Write down 3 honest things you don\'t miss. Small ones count.' },
+    { t: '5-4-3-2-1 Grounding', d: 'Notice 5 things you see, 4 you can touch, 3 you hear, 2 you smell, 1 you taste.' },
+    { t: 'Cold Water Reset', d: 'Wash your face or hands with cool water and take five slow breaths.' },
+    { t: 'Quick Doodle', d: 'Draw anything for 3 minutes — shapes, lines, a silly creature. It doesn\'t need to be good.' },
+    { t: 'Brain Dump', d: 'Write everything in your head without editing. Then close the page.' },
+    { t: 'Box Breathing', d: 'Breathe in for 4, hold for 4, out for 4, hold for 4. Repeat 5 times.' },
+    { t: 'Stretch Break', d: 'Roll your shoulders, reach overhead, touch your toes, and shake out your hands.' },
+    { t: 'Tiny Gratitude List', d: 'Write 3 small things from today that were okay or even nice.' },
+    { t: 'Snack and Sit', d: 'Make a simple snack or drink and enjoy it slowly without a screen.' },
+    { t: 'Window Watch', d: 'Look out a window for 2 minutes and count every color or movement you notice.' },
+    { t: 'Future Me Wishlist', d: 'List 3 small things you\'d like to try in the next month.' },
+    { t: 'Compliment Yourself', d: 'Write one kind sentence you\'d say to a friend in your situation, then read it to yourself.' }
+  ];
+
+  var STATUS = [
+    [0,   'You showed up — that already counts. One small step is enough today.'],
+    [15,  'You\'re getting started. Be gentle; healing isn\'t a race.'],
+    [35,  'Momentum is building. Notice what feels a little lighter.'],
+    [55,  'You\'re past the halfway mark of the heavy part. Keep your boundaries kind and steady.'],
+    [75,  'You\'re rebuilding a life of your own. Look how far you\'ve come.'],
+    [95,  'You\'re nearly there. Soon you may not need this app — and that\'s the goal.'],
+    [100, 'You did it. Take a breath, celebrate, and consider graduating from the tracker.']
+  ];
+
+  /* ===================== STATE ===================== */
+  var STORE_KEY  = 'moveon_state_v1';
+  var UNLOCK_KEY = 'moveon_unlocked_v1';
+
+  function defaultState() {
+    return { startedAt: Date.now(), steps: {}, bonus: 0, reconnects: [], initiatives: [],
+             activeInitiative: null, todos: [], checkins: {} };
+  }
+  function loadState() {
+    try {
+      var raw = localStorage.getItem(STORE_KEY);
+      if (!raw) return defaultState();
+      var parsed = JSON.parse(raw);
+      return Object.assign(defaultState(), parsed);
+    } catch (e) { return defaultState(); }
+  }
+  var state = loadState();
+  var saveWarned = false;
+  function save() {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+    catch (e) {
+      if (!saveWarned) { saveWarned = true; toast('Could not save on this browser. Try opening in Safari or Chrome.'); }
+    }
+  }
+
+  /* ===================== HELPERS ===================== */
+  var $ = function (id) { return document.getElementById(id); };
+  var toastTimer;
+  function toast(msg) {
+    var t = $('toast'); t.textContent = msg; t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2400);
+  }
+  function todayKey() {
+    var d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function fmtDateTime(ts) {
+    try { return new Date(ts).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }); }
+    catch (e) { return new Date(ts).toString(); }
+  }
+  function clamp(n, lo, hi) { return Math.min(hi, Math.max(lo, n)); }
+  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text !== undefined) e.textContent = text;
+    return e;
+  }
+
+  /* ===================== PERCENTAGE ===================== */
+  function stepsDone() {
+    var n = 0; Object.keys(state.steps).forEach(function (k) { if (state.steps[k]) n++; }); return n;
+  }
+  function stepsPart() { return (stepsDone() / TOTAL_STEPS) * 80; }  // steps are worth up to 80%
+  function percent() { return clamp(Math.round(stepsPart() + state.bonus), 0, 100); }
+  // Bonus (small wins from to-dos and resets, minus setbacks) is kept within a sensible range
+  function setBonus(b) { state.bonus = clamp(b, -80, 20); }
+  function setPercentTarget(target) { setBonus(clamp(target, 0, 100) - stepsPart()); }
+
+  /* ===================== GAUGE ===================== */
+  var CIRC = 2 * Math.PI * 82;
+  var shownPct = 0, animFrame = null;
+  function renderGauge() {
+    var p = percent();
+    $('gaugeBar').style.strokeDashoffset = String(CIRC * (1 - p / 100));
+    // animate the number
+    cancelAnimationFrame(animFrame);
+    var from = shownPct, start = null, dur = 700;
+    function tick(ts) {
+      if (start === null) start = ts;
+      var k = Math.min(1, (ts - start) / dur);
+      var v = Math.round(from + (p - from) * k);
+      $('pctNum').textContent = v + '%';
+      if (k < 1) animFrame = requestAnimationFrame(tick); else shownPct = p;
+    }
+    animFrame = requestAnimationFrame(tick);
+    $('gaugeBar').style.stroke = p >= 75 ? 'var(--sage)' : 'var(--clay)';
+
+    var msg = STATUS[0][1];
+    STATUS.forEach(function (s) { if (p >= s[0]) msg = s[1]; });
+    $('statusMsg').textContent = msg;
+
+    var day = Math.max(1, Math.floor((Date.now() - state.startedAt) / 86400000) + 1);
+    $('dayChip').textContent = 'Day ' + day + ' of your journey';
+    var note;
+    if (day > TRACKER_CONFIG.JOURNEY_MAX_DAYS || p >= 100) {
+      note = 'You\'ve reached the end of the typical 30–90 day window. Consider celebrating and graduating from the tracker whenever it feels right.';
+    } else if (day >= TRACKER_CONFIG.JOURNEY_MIN_DAYS) {
+      note = 'You\'re inside the 30–90 day window. Many people feel ready to graduate somewhere in here — listen to yourself.';
+    } else {
+      note = 'This is a 30–90 day transition tool, not a forever app. The goal is to build momentum and then graduate.';
+    }
+    $('journeyNote').textContent = note;
+  }
+
+  /* ===================== ROADMAP ===================== */
+  function renderRoadmap() {
+    var host = $('roadmap');
+    var openIds = [];
+    host.querySelectorAll('details[open]').forEach(function (d) { openIds.push(d.dataset.phase); });
+    var firstRender = host.children.length === 0;
+    host.innerHTML = '';
+    PHASES.forEach(function (ph) {
+      var det = el('details', 'phase'); det.dataset.phase = String(ph.id);
+      var done = ph.steps.filter(function (s) { return state.steps[s.id]; }).length;
+      if (firstRender ? ph.id === 1 : openIds.indexOf(String(ph.id)) !== -1) det.open = true;
+      var sum = el('summary');
+      sum.appendChild(el('span', 'phase-num', 'Phase ' + ph.id));
+      sum.appendChild(el('span', 'phase-title', ph.title));
+      sum.appendChild(el('span', 'phase-count', done + '/' + ph.steps.length));
+      det.appendChild(sum);
+      var body = el('div', 'body');
+      ph.steps.forEach(function (s) {
+        var row = el('div', 'step' + (state.steps[s.id] ? ' done' : ''));
+        var cb = document.createElement('input');
+        cb.type = 'checkbox'; cb.checked = !!state.steps[s.id]; cb.id = 'cb_' + s.id;
+        cb.addEventListener('change', function () {
+          state.steps[s.id] = cb.checked;
+          save(); renderRoadmap(); renderGauge();
+          if (cb.checked) toast('Step complete. Nice work.');
+        });
+        var wrap = el('div');
+        var lab = document.createElement('label'); lab.htmlFor = cb.id;
+        var t = el('div', 't', s.text); t.style.fontWeight = '600';
+        lab.appendChild(t);
+        var why = el('div', 'why');
+        var b = el('b', null, 'Why this step matters: '); why.appendChild(b);
+        why.appendChild(document.createTextNode(s.why));
+        wrap.appendChild(lab); wrap.appendChild(why);
+        row.appendChild(cb); row.appendChild(wrap);
+        body.appendChild(row);
+      });
+      det.appendChild(body);
+      host.appendChild(det);
+    });
+  }
+
+  /* ===================== RECONNECT + INITIATIVE ===================== */
+  function currentInitiative() {
+    return state.initiatives.find(function (i) { return i.id === state.activeInitiative; }) || null;
+  }
+  function pickRandomInitiative(excludeText) {
+    var pool = INITIATIVES.filter(function (t) { return t !== excludeText; });
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
+  function startInitiative(text) {
+    var item = { id: uid(), ts: Date.now(), text: text, done: false, credited: false };
+    state.initiatives.push(item);
+    state.activeInitiative = item.id;
+    save();
+  }
+  function renderInitiative() {
+    var card = $('initiativeCard');
+    var cur = currentInitiative();
+    if (!cur) { card.style.display = 'none'; return; }
+    card.style.display = 'block';
+    $('initiativeText').textContent = cur.text;
+    $('initiativeDone').checked = cur.done;
+    var chips = $('initiativeChips'); chips.innerHTML = '';
+    INITIATIVES.forEach(function (t, idx) {
+      var c = el('button', 'chip' + (t === cur.text ? ' sel' : ''), 'Reset ' + (idx + 1));
+      c.type = 'button'; c.title = t;
+      c.addEventListener('click', function () {
+        if (cur.done) { startInitiative(t); } else { cur.text = t; save(); }
+        renderInitiative();
+      });
+      chips.appendChild(c);
+    });
+  }
+  function renderReconnectLog() {
+    var ul = $('reconnectLog'); ul.innerHTML = '';
+    var items = state.reconnects.slice(-5).reverse();
+    if (!items.length) { ul.appendChild(el('li', null, 'No check-ins logged. That\'s fine — this is just here if you need it.')); return; }
+    items.forEach(function (r) {
+      var txt = fmtDateTime(r.ts) + ' · ' + r.before + '% → ' + r.after + '%';
+      if (r.note) txt += ' · ' + r.note;
+      ul.appendChild(el('li', null, txt));
+    });
+  }
+  $('reconnectBtn').addEventListener('click', function () {
+    var before = percent();
+    var after = Math.max(0, before - 5);
+    setPercentTarget(after);
+    state.reconnects.push({ ts: Date.now(), note: $('reconnectNote').value.trim(), before: before, after: after });
+    $('reconnectNote').value = '';
+    startInitiative(pickRandomInitiative());
+    save();
+    renderGauge(); renderReconnectLog(); renderInitiative();
+    toast('Logged without judgment. Here\'s one small reset.');
+    $('initiativeCard').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+  $('initiativeShuffle').addEventListener('click', function () {
+    var cur = currentInitiative(); if (!cur) return;
+    var next = pickRandomInitiative(cur.text);
+    if (cur.done) startInitiative(next); else { cur.text = next; save(); }
+    renderInitiative();
+  });
+  $('initiativeDone').addEventListener('change', function (e) {
+    var cur = currentInitiative(); if (!cur) return;
+    cur.done = e.target.checked;
+    if (cur.done && !cur.credited) {
+      cur.credited = true;
+      setBonus(state.bonus + 2);
+      toast('Momentum rebuilt: +2%');
+    }
+    save(); renderGauge();
+  });
+
+  /* ===================== ACTIVITIES + TIMER ===================== */
+  var activityIndex = 0;
+  function renderActivity() {
+    var a = ACTIVITIES[activityIndex];
+    var box = $('activityBox'); box.innerHTML = '';
+    box.appendChild(el('b', null, a.t));
+    box.appendChild(el('span', null, a.d));
+    var chips = $('activityChips'); chips.innerHTML = '';
+    ACTIVITIES.forEach(function (x, i) {
+      var c = el('button', 'chip' + (i === activityIndex ? ' sel' : ''), x.t);
+      c.type = 'button';
+      c.addEventListener('click', function () { activityIndex = i; renderActivity(); });
+      chips.appendChild(c);
+    });
+  }
+  $('activityRandom').addEventListener('click', function () {
+    var n; do { n = Math.floor(Math.random() * ACTIVITIES.length); } while (n === activityIndex && ACTIVITIES.length > 1);
+    activityIndex = n; renderActivity();
+  });
+
+  var TIMER_TOTAL = 300, timerRemaining = TIMER_TOTAL, timerEnd = 0, timerIv = null;
+  function showTimer() {
+    var m = Math.floor(timerRemaining / 60), s = timerRemaining % 60;
+    $('timerDisplay').textContent = m + ':' + String(s).padStart(2, '0');
+  }
+  function timerTick() {
+    timerRemaining = Math.max(0, Math.ceil((timerEnd - Date.now()) / 1000));
+    showTimer();
+    if (timerRemaining <= 0) {
+      clearInterval(timerIv); timerIv = null;
+      toast('Time\'s up. Take a breath — how do you feel?');
+      try { if (navigator.vibrate) navigator.vibrate([200, 100, 200]); } catch (e) {}
+      timerRemaining = TIMER_TOTAL; showTimer();
+    }
+  }
+  $('timerStart').addEventListener('click', function () {
+    if (timerIv) return;
+    timerEnd = Date.now() + timerRemaining * 1000;
+    timerIv = setInterval(timerTick, 250);
+  });
+  $('timerPause').addEventListener('click', function () {
+    if (!timerIv) return;
+    timerRemaining = Math.max(0, Math.ceil((timerEnd - Date.now()) / 1000));
+    clearInterval(timerIv); timerIv = null; showTimer();
+  });
+  $('timerReset').addEventListener('click', function () {
+    clearInterval(timerIv); timerIv = null; timerRemaining = TIMER_TOTAL; showTimer();
+  });
+
+  /* ===================== DAILY CHECK-IN ===================== */
+  var CHECKIN_LABELS = {
+    steady: 'Kept my boundaries', mixed: 'Mixed day', slipped: 'Slipped, starting again', resting: 'Rested and got through it'
+  };
+  function renderCheckin() {
+    var key = todayKey();
+    $('checkinDate').textContent = 'Today: ' + new Date().toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
+    var cur = state.checkins[key];
+    $('checkinSelect').value = cur ? cur.mood : '';
+    $('checkinNote').value = cur ? cur.note : '';
+    var ul = $('checkinLog'); ul.innerHTML = '';
+    var keys = Object.keys(state.checkins).sort().reverse().slice(0, 7);
+    if (!keys.length) { ul.appendChild(el('li', null, 'No check-ins yet.')); return; }
+    keys.forEach(function (k) {
+      var c = state.checkins[k];
+      var txt = k + ' · ' + (CHECKIN_LABELS[c.mood] || 'Checked in') + (c.note ? ' — ' + c.note : '');
+      ul.appendChild(el('li', null, txt));
+    });
+  }
+  $('checkinSave').addEventListener('click', function () {
+    var mood = $('checkinSelect').value;
+    if (!mood) { toast('Pick how today went first.'); return; }
+    state.checkins[todayKey()] = { mood: mood, note: $('checkinNote').value.trim(), savedAt: Date.now() };
+    save(); renderCheckin();
+    toast('Saved. Thank you for being honest with yourself.');
+  });
+
+  /* ===================== TODOS ===================== */
+  var todoFilter = 'all';
+  function renderTodos() {
+    var host = $('todoList'); host.innerHTML = '';
+    var list = state.todos.filter(function (t) {
+      return todoFilter === 'all' || (todoFilter === 'done' ? t.done : !t.done);
+    });
+    if (!list.length) host.appendChild(el('p', 'muted', 'Nothing here yet.'));
+    list.forEach(function (t) {
+      var row = el('div', 'todo' + (t.done ? ' done' : ''));
+      var cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = t.done;
+      cb.setAttribute('aria-label', 'Mark task done');
+      cb.addEventListener('change', function () {
+        t.done = cb.checked;
+        if (t.done && !t.credited) { t.credited = true; setBonus(state.bonus + 1); toast('Small win: +1%'); }
+        save(); renderTodos(); renderGauge();
+      });
+      var txt = el('span', 't', t.text);
+      var x = el('button', 'x', '×'); x.type = 'button'; x.setAttribute('aria-label', 'Delete task');
+      x.addEventListener('click', function () {
+        state.todos = state.todos.filter(function (o) { return o.id !== t.id; });
+        save(); renderTodos();
+      });
+      row.appendChild(cb); row.appendChild(txt); row.appendChild(x);
+      host.appendChild(row);
+    });
+    document.querySelectorAll('#todoFilter button').forEach(function (b) {
+      b.classList.toggle('on', b.dataset.f === todoFilter);
+    });
+  }
+  $('todoForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var v = $('todoInput').value.trim();
+    if (!v) return;
+    state.todos.push({ id: uid(), text: v, done: false, credited: false });
+    $('todoInput').value = '';
+    save(); renderTodos();
+  });
+  $('todoFilter').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    todoFilter = b.dataset.f; renderTodos();
+  });
+  $('todoClear').addEventListener('click', function () {
+    var n = state.todos.filter(function (t) { return t.done; }).length;
+    if (!n) { toast('No completed tasks to clear.'); return; }
+    state.todos = state.todos.filter(function (t) { return !t.done; });
+    save(); renderTodos(); toast('Cleared ' + n + ' completed task' + (n > 1 ? 's' : '') + '.');
+  });
+
+  /* ===================== BACKUP / RESTORE ===================== */
+  function makeBackup() {
+    var payload = { app: 'moving-on', version: 1, exportedAt: new Date().toISOString(), data: state };
+    $('backupBox').value = JSON.stringify(payload);
+  }
+  function copyText(text) {
+    function fallback() {
+      var box = $('backupBox'); box.focus(); box.select(); box.setSelectionRange(0, box.value.length);
+      var ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
+      toast(ok ? 'Backup copied ✓' : 'Press and hold the text to copy it.');
+    }
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(function () { toast('Backup copied ✓'); }, fallback);
+    } else { fallback(); }
+  }
+  $('backupMake').addEventListener('click', function () { makeBackup(); toast('Backup created. Tap Copy.'); });
+  $('backupCopy').addEventListener('click', function () {
+    if (!$('backupBox').value.trim()) makeBackup();
+    copyText($('backupBox').value);
+  });
+  $('backupRestore').addEventListener('click', function () {
+    var raw = $('backupBox').value.trim();
+    if (!raw) { toast('Paste a backup into the box first.'); return; }
+    try {
+      var parsed = JSON.parse(raw);
+      var data = parsed && parsed.app === 'moving-on' ? parsed.data : null;
+      if (!data || typeof data !== 'object' || typeof data.steps !== 'object') throw new Error('bad');
+      if (!window.confirm('Restore this backup? It will replace the progress currently on this phone.')) return;
+      state = Object.assign(defaultState(), data);
+      save();
+      renderAll();
+      toast('Backup restored ✓');
+    } catch (e) { toast('That doesn\'t look like a valid backup.'); }
+  });
+
+  /* ===================== RENDER ALL ===================== */
+  function renderAll() {
+    renderGauge(); renderRoadmap(); renderReconnectLog(); renderInitiative();
+    renderActivity(); showTimer(); renderCheckin(); renderTodos();
+  }
+
+  /* ===================== GATE ===================== */
+  function isUnlocked() {
+    if (!TRACKER_CONFIG.REQUIRE_CODE) return true;
+    try { return localStorage.getItem(UNLOCK_KEY) === '1'; } catch (e) { return false; }
+  }
+  function showApp() {
+    $('gate').style.display = 'none';
+    $('app').style.display = 'block';
+    renderAll();
+  }
+  $('gateForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var entered = $('codeInput').value.trim().toUpperCase();
+    if (entered && entered === String(TRACKER_CONFIG.ACCESS_CODE).toUpperCase()) {
+      try { localStorage.setItem(UNLOCK_KEY, '1'); } catch (err) {}
+      $('gateErr').textContent = '';
+      showApp();
+    } else {
+      $('gateErr').textContent = 'That code doesn\'t match. Please check your message and try again.';
+    }
+  });
+
+  document.title = TRACKER_CONFIG.BRAND_NAME + ' — Tracker';
+  $('gateBrand').textContent = TRACKER_CONFIG.BRAND_NAME;
+  $('appBrand').textContent = TRACKER_CONFIG.BRAND_NAME;
+  if (isUnlocked()) showApp();
+
+  /* ===================== SERVICE WORKER ===================== */
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('./sw.js').catch(function () {});
+    });
+  }
+})();
+</script>
+</body>
+</html>

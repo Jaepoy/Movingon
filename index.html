@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Moving On — A 30-to-90-Day Transition Companion</title>
+<meta name="description" content="A gentle, practical companion to help you move through heartbreak and transitions in 30 to 90 days.">
+<meta name="theme-color" content="#FAF7F2">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- =====================================================================
+     CONFIGURATION — EDIT THESE VALUES (everything below updates automatically)
+     ===================================================================== -->
+<script>
+  const CONFIG = {
+    BRAND_NAME:   "Moving On",                 // Your product / brand name
+    CREATOR_NAME: "Your Name",                 // Your first name or full name
+    PRICE:        "₱199",                      // Display price (any text, e.g. "₱149" or "₱199 one-time")
+    GCASH_NAME:   "Your Full Name",            // Account name shown on GCash/Maya
+    GCASH_NUMBER: "0917 123 4567",             // GCash/Maya number buyers will copy
+    GCASH_LABEL:  "GCash / Maya",              // Label shown next to the number
+    // Where the "I've Paid" button goes. Paste ONE of these:
+    //   - a Google Form link (ask for: name, email, receipt screenshot upload)
+    //   - a payment checkout link
+    //   - a mailto: link, e.g. "mailto:you@example.com?subject=I%20paid%20-%20please%20send%20access"
+    RECEIPT_LINK: "https://forms.gle/REPLACE_WITH_YOUR_FORM_LINK",
+    // NOTE: The buyer unlock code is set inside tracker.html (ACCESS_CODE).
+    // Keep that code in your private reply to buyers — do NOT print it on this public page.
+    UNLOCK_CODE_HINT: "Your unlock code arrives with your access link."
+  };
+</script>
+
+<style>
+  :root{
+    --cream:#FAF7F2; --card:#FFFFFF; --ink:#2B2623; --line:#EAE3D9;
+    --clay:#C47457; --clay-dark:#A85D42; --sage:#7D8F7B; --muted:#6F6761;
+    --shadow:0 1px 2px rgba(43,38,35,.05),0 6px 18px rgba(43,38,35,.06);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  body{
+    background:var(--cream);color:var(--ink);
+    font-family:"Plus Jakarta Sans",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    line-height:1.6;font-size:16px;
+    padding:0 0 env(safe-area-inset-bottom);
+  }
+  .wrap{max-width:560px;margin:0 auto;padding:20px 18px 48px}
+  h1,h2,h3{font-family:Lora,Georgia,serif;line-height:1.25;font-weight:600}
+  h1{font-size:2rem;margin-bottom:12px}
+  h2{font-size:1.45rem;margin-bottom:10px}
+  h3{font-size:1.1rem;margin-bottom:6px}
+  p{margin-bottom:12px}
+  section{margin-top:34px}
+  .eyebrow{font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--sage);font-weight:700;margin-bottom:8px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:var(--shadow);margin-bottom:14px}
+  .muted{color:var(--muted);font-size:.93rem}
+  .brandrow{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+  .brandrow img{width:46px;height:46px;border-radius:12px;border:1px solid var(--line)}
+  .brandrow span{font-family:Lora,serif;font-weight:700;font-size:1.15rem}
+  .btn{
+    display:block;width:100%;text-align:center;text-decoration:none;cursor:pointer;
+    background:var(--clay);color:#fff;border:0;border-radius:14px;padding:15px 18px;
+    font:600 1rem "Plus Jakarta Sans",sans-serif;min-height:50px;
+  }
+  .btn:active{background:var(--clay-dark)}
+  .btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+  .btn.sage{background:var(--sage)}
+  .btn + .btn{margin-top:10px}
+  .pill{display:inline-block;background:#EEF1EC;color:#55664F;border-radius:999px;padding:4px 12px;font-size:.8rem;font-weight:600;margin:0 6px 8px 0}
+  ul.clean{list-style:none}
+  ul.clean li{padding:10px 0;border-bottom:1px solid var(--line)}
+  ul.clean li:last-child{border-bottom:0}
+  .feature{display:flex;gap:12px;align-items:flex-start}
+  .feature .dot{flex:0 0 34px;height:34px;border-radius:50%;background:#F6E9E3;color:var(--clay);display:flex;align-items:center;justify-content:center;font-weight:700}
+  .phase-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .phase-num{background:var(--clay);color:#fff;border-radius:10px;padding:3px 10px;font-size:.78rem;font-weight:700;white-space:nowrap}
+  .step{padding:10px 0;border-top:1px dashed var(--line)}
+  .step:first-of-type{border-top:0}
+  .why{font-size:.9rem;color:var(--muted);margin-top:4px}
+  .why b{color:var(--sage)}
+  .price{font-family:Lora,serif;font-size:2.6rem;font-weight:700;color:var(--clay);line-height:1}
+  .qr{display:block;margin:14px auto;width:min(260px,70%);aspect-ratio:1/1;border:1px solid var(--line);border-radius:14px;background:#fff;object-fit:contain}
+  .numbox{background:var(--cream);border:1px dashed var(--line);border-radius:12px;padding:12px;margin:10px 0;text-align:center}
+  .numbox strong{display:block;font-size:1.25rem;letter-spacing:.04em}
+  ol.steps{padding-left:20px}
+  ol.steps li{margin-bottom:8px}
+  details{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:10px;padding:0 16px}
+  summary{cursor:pointer;font-weight:600;padding:14px 0;list-style:none;display:flex;justify-content:space-between;gap:10px;align-items:center}
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:"+";color:var(--clay);font-size:1.3rem;font-weight:600}
+  details[open] summary::after{content:"–"}
+  details p{padding-bottom:6px;color:#4a423d}
+  footer{margin-top:40px;text-align:center;color:var(--muted);font-size:.85rem}
+  .toast{
+    position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translate(-50%,30px);
+    background:var(--ink);color:#fff;padding:12px 18px;border-radius:12px;font-size:.92rem;
+    opacity:0;pointer-events:none;transition:.25s;z-index:50;max-width:90%;text-align:center
+  }
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+  .quote{border-left:3px solid var(--clay);padding:4px 0 4px 14px;font-family:Lora,serif;font-style:italic;color:#4a423d;margin:14px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ HEADER / INTRO ============ -->
+  <div class="brandrow">
+    <img src="./icon-192.png" alt="" width="46" height="46">
+    <span data-cfg="BRAND_NAME">Moving On</span>
+  </div>
+
+  <p class="eyebrow">A 30-to-90-day transition companion</p>
+  <h1>You don't have to figure out how to move on alone.</h1>
+
+  <p>Hi, I'm <strong data-cfg="CREATOR_NAME">Your Name</strong>. I made this because the hardest part of a breakup or big life transition isn't the crying — it's the in-between days when you don't know what to do next.</p>
+  <p><strong data-cfg="BRAND_NAME">Moving On</strong> gives you small, concrete steps and a calm place to track them. It is not a "forever app." It's built to help you build momentum over about <strong>30 to 90 days</strong>, and then <em>graduate</em> — because the goal is a life that doesn't need the app.</p>
+
+  <div class="quote">No pressure, no judgment. Your pace is always yours.</div>
+
+  <a class="btn" href="#checkout">Get access — <span data-cfg="PRICE">₱199</span></a>
+  <a class="btn ghost" href="#roadmap">See the 4-phase roadmap</a>
+
+  <!-- ============ WHAT'S INSIDE ============ -->
+  <section id="inside">
+    <p class="eyebrow">What's inside</p>
+    <h2>Everything you need, nothing you don't.</h2>
+    <div class="card">
+      <ul class="clean">
+        <li class="feature"><div class="dot">1</div><div><h3>Guided steps</h3><p class="muted">12 concrete steps across 4 phases, each with a short note on why it matters.</p></div></li>
+        <li class="feature"><div class="dot">2</div><div><h3>Moving-on percentage gauge</h3><p class="muted">A calm progress ring that grows as you complete steps and small wins.</p></div></li>
+        <li class="feature"><div class="dot">3</div><div><h3>Reconnect &amp; reset loop</h3><p class="muted">If you reach out or check in, log it without shame — then take a small reset action to rebuild momentum.</p></div></li>
+        <li class="feature"><div class="dot">4</div><div><h3>Playful focus activities</h3><p class="muted">12+ five-minute resets with a built-in timer for when overthinking hits.</p></div></li>
+        <li class="feature"><div class="dot">5</div><div><h3>End-of-day honesty check-in</h3><p class="muted">A private note to yourself each night. The app only monitors progress — your decisions are yours.</p></div></li>
+        <li class="feature"><div class="dot">6</div><div><h3>Personal to-do list</h3><p class="muted">Add your own small tasks and get a gentle progress boost for each one.</p></div></li>
+      </ul>
+    </div>
+    <span class="pill">Works on iPhone &amp; Android</span>
+    <span class="pill">Add to Home Screen</span>
+    <span class="pill">Works offline</span>
+    <span class="pill">Private — stays on your phone</span>
+  </section>
+
+  <!-- ============ ROADMAP PREVIEW ============ -->
+  <section id="roadmap">
+    <p class="eyebrow">The roadmap</p>
+    <h2>Why each step matters</h2>
+    <p class="muted">Every step in the app comes with a reason, so you're never just ticking boxes.</p>
+
+    <div class="card">
+      <div class="phase-head"><span class="phase-num">Phase 1</span><h3>Radical Acceptance</h3></div>
+      <div class="step"><strong>Write down the facts of what ended.</strong>
+        <p class="why"><b>Why this step matters:</b> Plain facts stop the mind from bargaining with "what if." You can't move away from something you're still negotiating with.</p></div>
+      <div class="step"><strong>Name three feelings out loud.</strong>
+        <p class="why"><b>Why this step matters:</b> Putting a name on a feeling lowers its intensity and makes it something you can work with, not something that runs you.</p></div>
+      <div class="step"><strong>Say "This chapter is over, and I will be okay."</strong>
+        <p class="why"><b>Why this step matters:</b> Hearing your own voice say it begins turning a painful idea into an accepted fact.</p></div>
+    </div>
+
+    <div class="card">
+      <div class="phase-head"><span class="phase-num">Phase 2</span><h3>Processing Without Spiraling</h3></div>
+      <div class="step"><strong>Set a daily 15-minute "feelings window."</strong>
+        <p class="why"><b>Why this step matters:</b> Giving grief a time and place keeps it from leaking into every hour of your day.</p></div>
+      <div class="step"><strong>Write an unsent letter — and keep it unsent.</strong>
+        <p class="why"><b>Why this step matters:</b> You get to say everything without consequences, so the words stop circling in your head.</p></div>
+      <div class="step"><strong>Tell one trusted person how you really are.</strong>
+        <p class="why"><b>Why this step matters:</b> Carrying it alone makes it heavier. One honest conversation lightens more than a week of coping in silence.</p></div>
+    </div>
+
+    <div class="card">
+      <div class="phase-head"><span class="phase-num">Phase 3</span><h3>Boundaries &amp; Detox</h3></div>
+      <div class="step"><strong>Mute, archive, or hide their messages and updates.</strong>
+        <p class="why"><b>Why this step matters:</b> Every reminder restarts the craving to check. Less exposure means fewer urges to fight.</p></div>
+      <div class="step"><strong>Box up reminders for 30 days.</strong>
+        <p class="why"><b>Why this step matters:</b> Out of sight gives your nervous system room to settle. Nothing is thrown away — you're just creating space.</p></div>
+      <div class="step"><strong>Write your own "if I feel the urge" plan.</strong>
+        <p class="why"><b>Why this step matters:</b> Decisions made while calm beat decisions made at 11 p.m. A plan you wrote yourself is easier to follow.</p></div>
+    </div>
+
+    <div class="card">
+      <div class="phase-head"><span class="phase-num">Phase 4</span><h3>Rebuilding Your Identity</h3></div>
+      <div class="step"><strong>List 5 things that are yours alone.</strong>
+        <p class="why"><b>Why this step matters:</b> Relationships can blur who you are. Reconnecting with your own values and interests rebuilds a steady sense of self.</p></div>
+      <div class="step"><strong>Schedule one thing just for you this week.</strong>
+        <p class="why"><b>Why this step matters:</b> Moving on is built from actions, not intentions. A booked plan turns "someday" into "Saturday."</p></div>
+      <div class="step"><strong>Write a note from you, 90 days from now.</strong>
+        <p class="why"><b>Why this step matters:</b> Picturing an ordinary good day ahead gives your mind something to walk toward, not just away from.</p></div>
+    </div>
+  </section>
+
+  <!-- ============ CHECKOUT ============ -->
+  <section id="checkout">
+    <p class="eyebrow">Get access</p>
+    <h2>Simple, one-time access</h2>
+    <div class="card" style="text-align:center">
+      <div class="price" data-cfg="PRICE">₱199</div>
+      <p class="muted" style="margin-top:6px">One-time payment · No subscription</p>
+
+      <!-- Replace gcash-qr.png in your repo with your own GCash/Maya QR screenshot -->
+      <img class="qr" src="./gcash-qr.png" alt="GCash or Maya QR code for payment" onerror="this.style.opacity='.4'">
+
+      <div class="numbox">
+        <span class="muted"><span data-cfg="GCASH_LABEL">GCash / Maya</span> · <span data-cfg="GCASH_NAME">Your Full Name</span></span>
+        <strong id="gcashNumber" data-cfg="GCASH_NUMBER">0917 123 4567</strong>
+      </div>
+      <button class="btn ghost" id="copyBtn" type="button">Copy GCash/Maya Number</button>
+
+      <!-- "I've Paid" button: its link is set from CONFIG.RECEIPT_LINK at the top of this file.
+           Use a Google Form (name, email, receipt screenshot), a checkout link, or a mailto: link. -->
+      <a class="btn" id="paidBtn" href="#" target="_blank" rel="noopener" style="margin-top:10px">I've Paid — Submit Receipt / Get Access</a>
+    </div>
+
+    <div class="card">
+      <h3>How you get access</h3>
+      <ol class="steps">
+        <li>Scan the QR or send the exact amount to the number above.</li>
+        <li>Tap <strong>"I've Paid"</strong> and submit your receipt screenshot with your email.</li>
+        <li>I'll verify and send you your private <strong>tracker link</strong> (tracker.html) and your <strong>unlock code</strong>.</li>
+        <li>Open the link in Safari (iPhone) or Chrome (Android) and add it to your Home Screen.</li>
+      </ol>
+      <p class="muted" id="unlockHint">Your unlock code arrives with your access link.</p>
+    </div>
+  </section>
+
+  <!-- ============ FAQ ============ -->
+  <section id="faq">
+    <p class="eyebrow">Questions</p>
+    <h2>Good to know</h2>
+
+    <details>
+      <summary>How do I receive it?</summary>
+      <p>After I verify your receipt, I send you a private link to your tracker plus your unlock code, usually by email or message. Open the link, enter the code once, and you're in.</p>
+    </details>
+    <details>
+      <summary>How do I add it to my iPhone Home Screen?</summary>
+      <p>Open your link in <strong>Safari</strong> (not inside another app's built-in browser). Tap the <strong>Share</strong> button, scroll down, then tap <strong>Add to Home Screen</strong> and confirm.</p>
+    </details>
+    <details>
+      <summary>How do I add it to my Android Home Screen?</summary>
+      <p>Open your link in <strong>Chrome</strong>. Tap the <strong>Menu ⋮</strong>, then choose <strong>Install app</strong> or <strong>Add to Home screen</strong>, and confirm.</p>
+    </details>
+    <details>
+      <summary>Can I share my link with friends?</summary>
+      <p>Your link and unlock code are meant for you. If a friend could use it, please send them to this page so they can get their own copy — it also helps keep this project going.</p>
+    </details>
+    <details>
+      <summary>Where is my progress stored?</summary>
+      <p>Only on your own phone, in your browser's local storage. Nothing is uploaded to a server. That also means clearing your browser data can erase it, so use the built-in <strong>Copy / Restore Backup</strong> box now and then, especially before switching phones.</p>
+    </details>
+    <details>
+      <summary>Does it work offline?</summary>
+      <p>Yes. After your first visit, the tracker is saved for offline use, so you can open it any time from your Home Screen.</p>
+    </details>
+    <details>
+      <summary>Is this therapy?</summary>
+      <p>No. It's a self-guided companion for everyday heartbreak and transitions. If you ever feel unsafe or overwhelmed, please reach out to a trusted person or a licensed mental health professional in your area.</p>
+    </details>
+  </section>
+
+  <footer>
+    <p>Made with care by <span data-cfg="CREATOR_NAME">Your Name</span> · <span data-cfg="BRAND_NAME">Moving On</span></p>
+    <p style="margin-top:6px">Be gentle with yourself. You're doing better than you think.</p>
+  </footer>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+  // Fill every [data-cfg] element from CONFIG
+  document.querySelectorAll('[data-cfg]').forEach(function (el) {
+    var key = el.getAttribute('data-cfg');
+    if (CONFIG[key] !== undefined) el.textContent = CONFIG[key];
+  });
+  document.title = CONFIG.BRAND_NAME + " — A 30-to-90-Day Transition Companion";
+  document.getElementById('paidBtn').href = CONFIG.RECEIPT_LINK;
+  document.getElementById('unlockHint').textContent = CONFIG.UNLOCK_CODE_HINT;
+
+  // Toast helper
+  var toastTimer;
+  function toast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2200);
+  }
+
+  // Copy number (modern clipboard API with a fallback for older mobile browsers)
+  document.getElementById('copyBtn').addEventListener('click', function () {
+    var text = CONFIG.GCASH_NUMBER.replace(/\s+/g, '');
+    function fallback() {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      ta.setSelectionRange(0, 99999);
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(ta);
+      toast(ok ? 'Number copied ✓' : 'Could not copy — please copy it manually');
+    }
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(function () { toast('Number copied ✓'); }, fallback);
+    } else {
+      fallback();
+    }
+  });
+
+  // Service worker (offline support on GitHub Pages)
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('./sw.js').catch(function () {});
+    });
+  }
+</script>
+</body>
+</html>

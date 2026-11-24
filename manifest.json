@@ -1,0 +1,25 @@
+{
+  "name": "Moving On — Transition Companion",
+  "short_name": "Moving On",
+  "description": "A gentle 30-to-90-day companion for moving through heartbreak and transitions.",
+  "start_url": "./tracker.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FAF7F2",
+  "theme_color": "#FAF7F2",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
